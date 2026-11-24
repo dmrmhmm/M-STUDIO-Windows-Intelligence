@@ -25,6 +25,7 @@ from mstudio.core.insights import assess_health, build_recommendations
 from mstudio.core.models import SystemSnapshot
 from mstudio.core.performance import collect_performance_sample
 from mstudio.core.reports import export_json_report
+from mstudio.core.storage import collect_storage_volumes
 
 
 def _format_bytes(value: int | None) -> str:
@@ -119,9 +120,25 @@ class _AuditWorker(QRunnable):
             self.signals.finished.emit(result, None)
 
 
+class _StorageWorker(QRunnable):
+    def __init__(self) -> None:
+        super().__init__()
+        self.signals = _AuditSignals()
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            volumes = collect_storage_volumes()
+        except Exception as exc:  # Convert provider failures into UI-safe results.  # noqa: BLE001
+            self.signals.finished.emit(None, f"{type(exc).__name__}: {exc}")
+        else:
+            self.signals.finished.emit(volumes, None)
+
+
 class MainWindow(QMainWindow):
     refresh_finished = Signal(bool)
     audit_finished = Signal(bool)
+    storage_finished = Signal(bool)
 
     def __init__(
         self,
@@ -133,6 +150,7 @@ class MainWindow(QMainWindow):
         self._current_snapshot = snapshot
         self._refresh_worker: _RefreshWorker | None = None
         self._audit_worker: _AuditWorker | None = None
+        self._storage_worker: _StorageWorker | None = None
         self.setWindowTitle("M / STUDIO | Windows Intelligence")
         self.resize(900, 620)
         self.setMinimumSize(640, 460)
@@ -171,6 +189,11 @@ class MainWindow(QMainWindow):
         self.audit_button.setToolTip("Run bounded, read-only driver and security inventory")
         self.audit_button.clicked.connect(self.run_system_audit)
         header.addWidget(self.audit_button)
+        self.storage_button = QPushButton("Storage")
+        self.storage_button.setObjectName("storageButton")
+        self.storage_button.setToolTip("Inspect mounted volume capacity without changing files")
+        self.storage_button.clicked.connect(self.inspect_storage)
+        header.addWidget(self.storage_button)
         layout.addLayout(header)
 
         grid_host = QWidget()
@@ -325,6 +348,40 @@ class MainWindow(QMainWindow):
             self, "Read-only system audit",
             "\n".join((driver_text, security_text, "No settings or drivers were changed.")),
         )
+
+    @Slot()
+    def inspect_storage(self) -> None:
+        """Inspect mounted volume capacity on a worker thread."""
+        if self._storage_worker is not None:
+            return
+        self.storage_button.setEnabled(False)
+        self.storage_button.setText("Scanning…")
+        worker = _StorageWorker()
+        worker.signals.finished.connect(self._finish_storage)
+        self._storage_worker = worker
+        QThreadPool.globalInstance().start(worker)
+
+    @Slot(object, object)
+    def _finish_storage(self, volumes: object, error: object) -> None:
+        self._storage_worker = None
+        self.storage_button.setEnabled(True)
+        self.storage_button.setText("Storage")
+        if not isinstance(volumes, list) or error is not None:
+            QMessageBox.warning(self, "Storage inventory unavailable", str(error or "Unexpected result"))
+            self.storage_finished.emit(False)
+            return
+        if not volumes:
+            message = "No accessible mounted volumes were found."
+        else:
+            message = "\\n".join(
+                f"{item.mountpoint} ({item.filesystem}): {item.percent_used:.1f}% used, "
+                f"{_format_bytes(item.free_bytes)} free of {_format_bytes(item.total_bytes)}"
+                for item in volumes
+            )
+        QMessageBox.information(
+            self, "Storage inventory", message + "\\n\\nRead-only inspection; no files were changed."
+        )
+        self.storage_finished.emit(True)
 
     @Slot()
     def show_performance_sample(self) -> None:
