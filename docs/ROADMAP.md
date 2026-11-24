@@ -34,7 +34,7 @@
 
 ## Phase 0.4 - Ten intelligence modules
 - [x] 1. System health engine foundation.
-- [x] 2. Performance sampling foundation; live chart and bounded polling remain.
+- [x] 2. One-shot and bounded live performance sampling; live chart remains.
 - [x] 3. Rule-based warning diagnosis foundation; Windows Event Log analysis remains.
 - [x] 4. Hardware intelligence foundation via OS and processor snapshot.
 - [x] 5. Bounded mounted-volume storage inventory; volume explorer and SMART remain.
