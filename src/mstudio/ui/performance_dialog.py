@@ -22,6 +22,7 @@ class LivePerformanceDialog(QDialog):
         self._timer = QTimer(self)
         self._timer.setInterval(max(500, min(int(interval_ms), 5000)))
         self._timer.timeout.connect(self.collect_sample)
+        self.finished.connect(lambda _result: self._timer.stop())
         self.collect_sample()
         self._timer.start()
 
