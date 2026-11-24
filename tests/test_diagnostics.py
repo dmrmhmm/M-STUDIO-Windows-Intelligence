@@ -47,7 +47,7 @@ def test_disk_failure_does_not_discard_memory_metrics(monkeypatch):
 
 
 def test_windows_snapshot_includes_bounded_os_metadata(monkeypatch):
-    import mstudio.core.diagnostics as diagnostics
+    from mstudio.core import diagnostics
 
     monkeypatch.setattr(diagnostics.platform, "system", lambda: "Windows")
     monkeypatch.setattr(
@@ -70,7 +70,7 @@ def test_windows_snapshot_includes_bounded_os_metadata(monkeypatch):
 
 
 def test_windows_processor_fallback_when_platform_name_is_missing(monkeypatch):
-    import mstudio.core.diagnostics as diagnostics
+    from mstudio.core import diagnostics
 
     monkeypatch.setattr(diagnostics.platform, "system", lambda: "Windows")
     monkeypatch.setattr(diagnostics.platform, "processor", lambda: "")
