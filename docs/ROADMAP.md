@@ -20,13 +20,29 @@
 - [ ] Add accessibility and high-DPI review.
 - [ ] Verify all refresh and metadata behavior in Windows and Ubuntu CI.
 
-## Phase 0.3 - Insight
-- [ ] Explain metrics in plain language.
-- [ ] Add transparent, rule-based recommendations.
-- [ ] Export a user-requested diagnostics report.
+## Phase 0.3 - Intelligence foundations
+- [x] Add transparent system health scoring from available snapshot metrics.
+- [x] Show the health score and status on the dashboard.
+- [x] Add rule-based recommendations and conservative warning classification.
+- [x] Add non-blocking, on-demand performance sampling foundation.
+- [x] Add local JSON report generation foundation (only on explicit invocation).
+- [x] Add non-executing maintenance preview contract.
+- [ ] Add metric explanations and recommendation detail views.
 - [ ] Add optional local-only history with retention controls.
 
+## Phase 0.4 - Ten intelligence modules
+- [x] 1. System health engine foundation.
+- [x] 2. Performance sampling foundation; live chart and bounded polling remain.
+- [x] 3. Rule-based warning diagnosis foundation; Windows Event Log analysis remains.
+- [x] 4. Hardware intelligence foundation via OS and processor snapshot.
+- [x] 5. System-volume storage metrics foundation; volume explorer and SMART remain.
+- [ ] 6. Read-only driver and update audit.
+- [ ] 7. Read-only security and privacy audit.
+- [ ] 8. Optional AI explanation provider; local-first, explicit opt-in, no telemetry.
+- [x] 9. Local JSON report generation foundation.
+- [x] 10. Maintenance preview contract; no action execution.
+
 ## Later, subject to explicit review
-- [ ] Maintenance previews and rollback design.
 - [ ] Per-action consent and audit trail.
+- [ ] Rollback design for any future approved maintenance action.
 - [ ] No unattended or silent system modifications.
