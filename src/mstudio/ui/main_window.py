@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 )
 
 from mstudio.core.diagnostics import collect_snapshot
+from mstudio.core.insights import assess_health
 from mstudio.core.models import SystemSnapshot
 
 
@@ -32,6 +33,7 @@ def _format_bytes(value: int | None) -> str:
 
 
 def _snapshot_values(snapshot: SystemSnapshot) -> dict[str, str]:
+    health = assess_health(snapshot)
     os_name = snapshot.os_caption or snapshot.operating_system
     os_details = " · ".join(
         value
@@ -44,6 +46,7 @@ def _snapshot_values(snapshot: SystemSnapshot) -> dict[str, str]:
     )
     operating_system = f"{os_name}\\n{os_details}" if os_details else os_name
     return {
+        "SYSTEM HEALTH": f"{health.score}/100 · {health.status}",
         "OPERATING SYSTEM": operating_system,
         "DEVICE": snapshot.hostname,
         "PROCESSOR": snapshot.processor or "Unavailable",
