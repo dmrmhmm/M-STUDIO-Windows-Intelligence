@@ -1,7 +1,7 @@
 """Feature inventory and implementation boundaries for M / STUDIO."""
 FEATURES = (
     ("system_health", "System health engine", "active"),
-    ("performance", "Performance monitoring", "sampling foundation"),
+    ("performance", "Performance monitoring", "one-shot and bounded live sampling"),
     ("error_diagnostics", "Error diagnosis", "rule-based warning classification"),
     ("hardware", "Hardware intelligence", "snapshot foundation"),
     ("storage", "Disk and storage analysis", "system-volume metrics"),
