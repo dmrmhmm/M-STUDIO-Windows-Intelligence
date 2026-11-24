@@ -10,6 +10,8 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
+    QFileDialog,
+    QMessageBox,
     QPushButton,
     QScrollArea,
     QVBoxLayout,
@@ -17,8 +19,10 @@ from PySide6.QtWidgets import (
 )
 
 from mstudio.core.diagnostics import collect_snapshot
-from mstudio.core.insights import assess_health
+from mstudio.core.insights import assess_health, build_recommendations
 from mstudio.core.models import SystemSnapshot
+from mstudio.core.performance import collect_performance_sample
+from mstudio.core.reports import export_json_report
 
 
 def _format_bytes(value: int | None) -> str:
@@ -104,6 +108,7 @@ class MainWindow(QMainWindow):
     ) -> None:
         super().__init__()
         self._refresh_callback = refresh_callback
+        self._current_snapshot = snapshot
         self._refresh_worker: _RefreshWorker | None = None
         self.setWindowTitle("M / STUDIO | Windows Intelligence")
         self.resize(900, 620)
@@ -128,6 +133,16 @@ class MainWindow(QMainWindow):
         self.refresh_button.setToolTip("Collect a new read-only system snapshot")
         self.refresh_button.clicked.connect(self.refresh_snapshot)
         header.addWidget(self.refresh_button)
+        self.performance_button = QPushButton("Performance")
+        self.performance_button.setObjectName("performanceButton")
+        self.performance_button.setToolTip("Take one on-demand local performance sample")
+        self.performance_button.clicked.connect(self.show_performance_sample)
+        header.addWidget(self.performance_button)
+        self.export_button = QPushButton("Export report")
+        self.export_button.setObjectName("exportButton")
+        self.export_button.setToolTip("Save a local JSON diagnostics report")
+        self.export_button.clicked.connect(self.choose_report_destination)
+        header.addWidget(self.export_button)
         layout.addLayout(header)
 
         grid_host = QWidget()
@@ -187,6 +202,7 @@ class MainWindow(QMainWindow):
         self._apply_snapshot(snapshot)
 
     def _apply_snapshot(self, snapshot: SystemSnapshot) -> None:
+        self._current_snapshot = snapshot
         for label, value in _snapshot_values(snapshot).items():
             self._value_labels[label].setText(value)
         self._warning_label.setText("\\n".join(snapshot.warnings))
@@ -217,3 +233,36 @@ class MainWindow(QMainWindow):
         self.refresh_button.setText("Refresh")
         self.refresh_button.setEnabled(True)
         self.refresh_finished.emit(succeeded)
+
+    @Slot()
+    def show_performance_sample(self) -> None:
+        """Show one local sample; no polling or network activity is started."""
+        sample = collect_performance_sample()
+        values = (
+            f"CPU: {sample.cpu_percent:.1f}%" if sample.cpu_percent is not None else "CPU: unavailable",
+            f"Memory: {sample.memory_percent:.1f}%" if sample.memory_percent is not None else "Memory: unavailable",
+            f"System disk: {sample.disk_percent:.1f}%" if sample.disk_percent is not None else "System disk: unavailable",
+        )
+        QMessageBox.information(
+            self,
+            "Performance snapshot",
+            "\\n".join((*values, f"Collected: {sample.collected_at}")),
+        )
+
+    @Slot()
+    def choose_report_destination(self) -> None:
+        destination, _ = QFileDialog.getSaveFileName(
+            self, "Export diagnostics report", "mstudio-diagnostics.json",
+            "JSON report (*.json)",
+        )
+        if destination:
+            self.export_report(destination)
+
+    def export_report(self, destination: str) -> None:
+        """Export the currently displayed snapshot to a user-selected local path."""
+        try:
+            export_json_report(self._current_snapshot, destination)
+        except OSError as exc:
+            QMessageBox.warning(self, "Report export failed", f"Could not save report: {exc}")
+        else:
+            QMessageBox.information(self, "Report exported", f"Saved local report to:\\n{destination}")
