@@ -203,3 +203,16 @@ def test_local_ai_cancel_does_not_start_worker(qapp, monkeypatch):
     window.request_local_ai_explanation()
     assert window._local_ai_worker is None
     assert window.local_ai_button.isEnabled()
+
+def test_jarvis_command_dashboard_exposes_core_and_read_only_controls(qapp):
+    window = MainWindow(SystemSnapshot(hostname="dashboard-host"))
+
+    assert window.findChild(QLabel, "brand").text() == "M / STUDIO"
+    assert window.findChild(QLabel, "coreOrb").text() == "M"
+    assert window.findChild(QLabel, "heroKicker").text() == "INTELLIGENCE CORE  /  ONLINE"
+    assert window.findChild(QLabel, "safeIndicator") is not None
+    assert window.findChild(QLabel, "sectionTitle") is not None
+    assert window.findChild(QLabel, "metricValue") is not None
+    assert window.refresh_button.text() == "↻  Refresh scan"
+    assert "QWidget#sidebar" in window.styleSheet()
+    assert "QWidget#heroPanel" in window.styleSheet()
