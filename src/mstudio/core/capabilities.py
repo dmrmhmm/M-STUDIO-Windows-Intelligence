@@ -5,9 +5,9 @@ FEATURES = (
     ("error_diagnostics", "Error diagnosis", "rule-based warning classification"),
     ("hardware", "Hardware intelligence", "snapshot foundation"),
     ("storage", "Disk and storage analysis", "system-volume metrics"),
-    ("drivers", "Driver and update audit", "planned; read-only only"),
-    ("security", "Security and privacy center", "planned; read-only only"),
-    ("ai", "AI-assisted explanations", "planned; opt-in and no telemetry"),
+    ("drivers", "Driver and update audit", "read-only inventory foundation"),
+    ("security", "Security and privacy center", "read-only Defender/firewall audit foundation"),
+    ("ai", "AI-assisted explanations", "planned; optional opt-in provider, no telemetry"),
     ("reports", "Diagnostics reports", "local JSON export foundation"),
     ("maintenance", "Safe maintenance laboratory", "preview only; no execution"),
 )
