@@ -131,8 +131,8 @@ def test_system_audit_runs_off_ui_thread_and_reports_read_only_result(qapp, monk
 
     window.run_system_audit()
     assert not window.audit_button.isEnabled()
-    assert QThreadPool.globalInstance().waitForDone(5000)
-    qapp.processEvents()
+    QTimer.singleShot(5000, loop.quit)
+    loop.exec()
 
     assert outcomes == [True]
     assert window.audit_button.isEnabled()
