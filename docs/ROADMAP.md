@@ -10,9 +10,10 @@
 ## Phase 0.2 - Reliability
 - [ ] Windows 10 and Windows 11 smoke tests.
 - [ ] Add structured logging with local opt-in.
-- [ ] Add refresh action and clear collection timestamps.
+- [x] Add manual refresh action and update collection timestamp.
 - [ ] Add disk-volume selection with safe defaults.
 - [ ] Add accessibility and high-DPI review.
+- [ ] Verify refresh behavior in Windows and Ubuntu CI.
 
 ## Phase 0.3 - Insight
 - [ ] Explain metrics in plain language.
