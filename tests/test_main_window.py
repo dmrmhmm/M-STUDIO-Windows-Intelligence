@@ -3,6 +3,7 @@ import os
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest
+from PySide6.QtCore import QEventLoop, QTimer
 from PySide6.QtWidgets import QApplication, QLabel
 
 from mstudio.core.models import SystemSnapshot
@@ -21,12 +22,24 @@ def _metric_label(window: MainWindow, metric_key: str) -> QLabel:
     raise AssertionError(f"Metric label not found: {metric_key}")
 
 
+def _wait_for_refresh(window: MainWindow) -> bool:
+    loop = QEventLoop()
+    outcome: list[bool] = []
+    window.refresh_finished.connect(lambda succeeded: (outcome.append(succeeded), loop.quit()))
+    QTimer.singleShot(5000, loop.quit)
+    loop.exec()
+    assert outcome, "Refresh did not finish within five seconds."
+    return outcome[0]
+
+
 def test_refresh_button_updates_snapshot(qapp):
     initial = SystemSnapshot(hostname="before", collected_at="initial")
     refreshed = SystemSnapshot(hostname="after", collected_at="refreshed")
     window = MainWindow(initial, refresh_callback=lambda: refreshed)
 
     window.refresh_button.click()
+    assert not window.refresh_button.isEnabled()
+    assert _wait_for_refresh(window)
 
     assert _metric_label(window, "DEVICE").text() == "after"
     assert "refreshed" in window.findChild(QLabel, "footer").text()
@@ -41,7 +54,18 @@ def test_refresh_error_keeps_dashboard_available(qapp):
 
     window = MainWindow(initial, refresh_callback=fail_refresh)
     window.refresh_button.click()
+    assert not window.refresh_button.isEnabled()
+    assert not _wait_for_refresh(window)
 
     assert _metric_label(window, "DEVICE").text() == "still visible"
     assert "Refresh failed: OSError" in window.findChild(QLabel, "warning").text()
     assert window.refresh_button.isEnabled()
+
+
+def test_refresh_rejects_non_snapshot_result(qapp):
+    window = MainWindow(SystemSnapshot(hostname="unchanged"), refresh_callback=lambda: None)
+    window.refresh_button.click()
+
+    assert not _wait_for_refresh(window)
+    assert _metric_label(window, "DEVICE").text() == "unchanged"
+    assert "TypeError" in window.findChild(QLabel, "warning").text()
