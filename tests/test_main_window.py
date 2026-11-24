@@ -103,3 +103,12 @@ def test_performance_button_uses_single_local_sample(qapp, monkeypatch):
     window.show_performance_sample()
     assert shown
     assert "CPU: 10.0%" in shown[0][2]
+
+
+
+def test_dashboard_displays_explainable_recommendations(qapp):
+    window = MainWindow(SystemSnapshot(memory_percent=92))
+    insights = window.findChild(QLabel, "insights")
+    assert insights is not None
+    assert "Review memory usage" in insights.text()
+    assert "Memory pressure is elevated" in insights.text()
