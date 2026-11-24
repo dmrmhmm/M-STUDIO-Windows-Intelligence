@@ -140,3 +140,27 @@ def test_system_audit_runs_off_ui_thread_and_reports_read_only_result(qapp, monk
     assert window.audit_button.isEnabled()
     assert "12 entries" in messages[0][2]
     assert "No settings or drivers were changed." in messages[0][2]
+
+
+def test_storage_button_reports_read_only_volume_inventory(qapp, monkeypatch):
+    from types import SimpleNamespace
+    from mstudio.ui import main_window
+
+    monkeypatch.setattr(
+        main_window, "collect_storage_volumes",
+        lambda: [SimpleNamespace(mountpoint="C:\\", filesystem="NTFS", percent_used=50.0,
+                                 free_bytes=500, total_bytes=1000)],
+    )
+    messages = []
+    monkeypatch.setattr(main_window.QMessageBox, "information", lambda *args: messages.append(args))
+    window = MainWindow(SystemSnapshot())
+    outcomes = []
+    window.storage_finished.connect(outcomes.append)
+    window.inspect_storage()
+    assert not window.storage_button.isEnabled()
+    assert QThreadPool.globalInstance().waitForDone(5000)
+    qapp.processEvents()
+    assert outcomes == [True]
+    assert window.storage_button.isEnabled()
+    assert "50.0% used" in messages[0][2]
+    assert "no files were changed" in messages[0][2].lower()
