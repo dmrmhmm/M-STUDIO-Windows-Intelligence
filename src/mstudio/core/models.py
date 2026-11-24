@@ -18,6 +18,10 @@ class SystemSnapshot:
         default_factory=lambda: datetime.now(UTC).isoformat(timespec="seconds")
     )
     operating_system: str = "Unknown"
+    os_caption: str = ""
+    os_version: str = ""
+    os_build: str = ""
+    os_architecture: str = ""
     hostname: str = "Unknown"
     processor: str = "Unknown"
     logical_cores: int | None = None
