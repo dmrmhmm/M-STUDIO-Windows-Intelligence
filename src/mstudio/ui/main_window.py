@@ -185,77 +185,135 @@ class MainWindow(QMainWindow):
         self._value_labels: dict[str, QLabel] = {}
 
         root = QWidget()
-        layout = QVBoxLayout(root)
+        root.setObjectName("appRoot")
+        shell = QHBoxLayout(root)
+        shell.setContentsMargins(0, 0, 0, 0)
+        shell.setSpacing(0)
+
+        sidebar = QWidget()
+        sidebar.setObjectName("sidebar")
+        sidebar.setFixedWidth(204)
+        side_layout = QVBoxLayout(sidebar)
+        side_layout.setContentsMargins(18, 24, 18, 20)
+        side_layout.setSpacing(12)
+        brand = QLabel("M / STUDIO")
+        brand.setObjectName("brand")
+        side_layout.addWidget(brand)
+        brand_subtitle = QLabel("WINDOWS INTELLIGENCE")
+        brand_subtitle.setObjectName("brandSubtitle")
+        side_layout.addWidget(brand_subtitle)
+        side_layout.addSpacing(26)
+        nav_heading = QLabel("CONTROL DECK")
+        nav_heading.setObjectName("navHeading")
+        side_layout.addWidget(nav_heading)
+        for nav_text in ("OVERVIEW", "SYSTEM HEALTH", "PERFORMANCE", "HARDWARE", "STORAGE", "SECURITY", "LOCAL AI", "REPORTS"):
+            nav_item = QLabel(nav_text)
+            nav_item.setObjectName("navItem")
+            side_layout.addWidget(nav_item)
+        side_layout.addStretch(1)
+        safe_indicator = QLabel("●  READ-ONLY MODE")
+        safe_indicator.setObjectName("safeIndicator")
+        safe_indicator.setWordWrap(True)
+        side_layout.addWidget(safe_indicator)
+        version_label = QLabel("M-STUDIO  /  0.1.0")
+        version_label.setObjectName("sideVersion")
+        side_layout.addWidget(version_label)
+        shell.addWidget(sidebar)
+
+        scroll = QScrollArea()
+        scroll.setObjectName("mainScroll")
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        content_host = QWidget()
+        content_host.setObjectName("contentHost")
+        layout = QVBoxLayout(content_host)
+        layout.setContentsMargins(30, 24, 30, 26)
+        layout.setSpacing(18)
 
         header = QHBoxLayout()
         headings = QVBoxLayout()
-        title = QLabel("M / STUDIO")
+        eyebrow = QLabel("COMMAND INTERFACE  /  LOCAL SYSTEM")
+        eyebrow.setObjectName("eyebrow")
+        title = QLabel("System overview")
         title.setObjectName("title")
-        subtitle = QLabel("SYSTEM INTELLIGENCE  /  READ-ONLY DIAGNOSTICS")
+        subtitle = QLabel("Your machine, translated into clear live intelligence.")
         subtitle.setObjectName("subtitle")
+        headings.addWidget(eyebrow)
         headings.addWidget(title)
         headings.addWidget(subtitle)
         header.addLayout(headings)
         header.addStretch(1)
-        self.refresh_button = QPushButton("Refresh")
+        self.refresh_button = QPushButton("↻  Refresh scan")
         self.refresh_button.setObjectName("refreshButton")
         self.refresh_button.setToolTip("Collect a new read-only system snapshot")
         self.refresh_button.clicked.connect(self.refresh_snapshot)
-        header.addWidget(self.refresh_button)
+        header.addWidget(self.refresh_button, 0, Qt.AlignmentFlag.AlignVCenter)
         layout.addLayout(header)
-        actions_primary = QHBoxLayout()
-        actions_secondary = QHBoxLayout()
-        self.performance_button = QPushButton("Performance")
-        self.performance_button.setObjectName("performanceButton")
-        self.performance_button.setToolTip("Take one on-demand local performance sample")
-        self.performance_button.clicked.connect(self.show_performance_sample)
-        actions_primary.addWidget(self.performance_button)
-        self.live_performance_button = QPushButton("Live monitor")
-        self.live_performance_button.setObjectName("livePerformanceButton")
-        self.live_performance_button.setToolTip("Open a bounded 60-sample local performance monitor")
-        self.live_performance_button.clicked.connect(self.show_live_performance)
-        actions_primary.addWidget(self.live_performance_button)
-        self.export_button = QPushButton("Export report")
-        self.export_button.setObjectName("exportButton")
-        self.export_button.setToolTip("Save a local JSON diagnostics report")
-        self.export_button.clicked.connect(self.choose_report_destination)
-        actions_primary.addWidget(self.export_button)
-        self.audit_button = QPushButton("System audit")
-        self.audit_button.setObjectName("auditButton")
-        self.audit_button.setToolTip("Run bounded, read-only driver and security inventory")
-        self.audit_button.clicked.connect(self.run_system_audit)
-        actions_primary.addWidget(self.audit_button)
-        self.storage_button = QPushButton("Storage")
-        self.storage_button.setObjectName("storageButton")
-        self.storage_button.setToolTip("Inspect mounted volume capacity without changing files")
-        self.storage_button.clicked.connect(self.inspect_storage)
-        actions_secondary.addWidget(self.storage_button)
-        self.history_button = QPushButton("Save history")
-        self.history_button.setObjectName("historyButton")
-        self.history_button.setToolTip("Explicitly save this snapshot to a local SQLite history file")
-        self.history_button.clicked.connect(self.choose_history_destination)
-        actions_secondary.addWidget(self.history_button)
-        self.local_ai_button = QPushButton("Local AI")
-        self.local_ai_button.setObjectName("localAIButton")
-        self.local_ai_button.setToolTip("Ask an explicitly selected local Ollama model to explain diagnostics")
-        self.local_ai_button.clicked.connect(self.request_local_ai_explanation)
-        actions_secondary.addWidget(self.local_ai_button)
-        layout.addLayout(actions_primary)
-        layout.addLayout(actions_secondary)
+
+        hero = QWidget()
+        hero.setObjectName("heroPanel")
+        hero_layout = QHBoxLayout(hero)
+        hero_layout.setContentsMargins(22, 18, 22, 18)
+        hero_layout.setSpacing(22)
+        core_column = QVBoxLayout()
+        core_column.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        core_orb = QLabel("M")
+        core_orb.setObjectName("coreOrb")
+        core_orb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        core_orb.setFixedSize(112, 112)
+        core_caption = QLabel("M-STUDIO CORE")
+        core_caption.setObjectName("coreCaption")
+        core_caption.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        core_column.addWidget(core_orb, 0, Qt.AlignmentFlag.AlignCenter)
+        core_column.addWidget(core_caption)
+        hero_layout.addLayout(core_column)
+        hero_text = QVBoxLayout()
+        hero_kicker = QLabel("INTELLIGENCE CORE  /  ONLINE")
+        hero_kicker.setObjectName("heroKicker")
+        hero_title = QLabel("Good systems start with visibility.")
+        hero_title.setObjectName("heroTitle")
+        hero_description = QLabel(
+            "Read-only diagnostics are active. Review system health, inspect performance, "
+            "and understand your hardware from one control surface."
+        )
+        hero_description.setObjectName("heroDescription")
+        hero_description.setWordWrap(True)
+        hero_text.addWidget(hero_kicker)
+        hero_text.addWidget(hero_title)
+        hero_text.addWidget(hero_description)
+        hero_text.addStretch(1)
+        hero_layout.addLayout(hero_text, 1)
+        layout.addWidget(hero)
+
+        section_header = QHBoxLayout()
+        section_title = QLabel("SYSTEM TELEMETRY")
+        section_title.setObjectName("sectionTitle")
+        section_note = QLabel("LATEST READ-ONLY SNAPSHOT")
+        section_note.setObjectName("sectionNote")
+        section_header.addWidget(section_title)
+        section_header.addStretch(1)
+        section_header.addWidget(section_note)
+        layout.addLayout(section_header)
 
         grid_host = QWidget()
+        grid_host.setObjectName("metricsHost")
         grid = QGridLayout(grid_host)
+        grid.setContentsMargins(0, 0, 0, 0)
+        grid.setHorizontalSpacing(12)
+        grid.setVerticalSpacing(12)
+        metric_explanations = {
+            "SYSTEM HEALTH": "health_score",
+            "MEMORY LOAD": "memory_percent",
+            "DISK USAGE": "disk_percent",
+        }
         for index, (label, value) in enumerate(_snapshot_values(snapshot).items()):
             card = QWidget()
             card.setObjectName("metricCard")
             card_layout = QVBoxLayout(card)
+            card_layout.setContentsMargins(16, 15, 16, 16)
+            card_layout.setSpacing(8)
             heading = QLabel(label)
             heading.setObjectName("metricLabel")
-            metric_explanations = {
-                "SYSTEM HEALTH": "health_score",
-                "MEMORY LOAD": "memory_percent",
-                "DISK USAGE": "disk_percent",
-            }
             explanation = explain_metric(metric_explanations.get(label, label.lower().replace(" ", "_")))
             heading.setToolTip(explanation)
             content = QLabel(value)
@@ -266,8 +324,51 @@ class MainWindow(QMainWindow):
             self._value_labels[label] = content
             card_layout.addWidget(heading)
             card_layout.addWidget(content)
-            grid.addWidget(card, index // 2, index % 2)
+            grid.addWidget(card, index // 3, index % 3)
         layout.addWidget(grid_host)
+
+        actions_heading = QLabel("QUICK ACTIONS")
+        actions_heading.setObjectName("sectionTitle")
+        layout.addWidget(actions_heading)
+        actions_primary = QHBoxLayout()
+        actions_secondary = QHBoxLayout()
+        self.performance_button = QPushButton("Performance snapshot")
+        self.performance_button.setObjectName("performanceButton")
+        self.performance_button.setToolTip("Take one on-demand local performance sample")
+        self.performance_button.clicked.connect(self.show_performance_sample)
+        actions_primary.addWidget(self.performance_button)
+        self.live_performance_button = QPushButton("Live monitor")
+        self.live_performance_button.setObjectName("livePerformanceButton")
+        self.live_performance_button.setToolTip("Open a bounded 60-sample local performance monitor")
+        self.live_performance_button.clicked.connect(self.show_live_performance)
+        actions_primary.addWidget(self.live_performance_button)
+        self.audit_button = QPushButton("System audit")
+        self.audit_button.setObjectName("auditButton")
+        self.audit_button.setToolTip("Run bounded, read-only driver and security inventory")
+        self.audit_button.clicked.connect(self.run_system_audit)
+        actions_primary.addWidget(self.audit_button)
+        self.storage_button = QPushButton("Storage scan")
+        self.storage_button.setObjectName("storageButton")
+        self.storage_button.setToolTip("Inspect mounted volume capacity without changing files")
+        self.storage_button.clicked.connect(self.inspect_storage)
+        actions_secondary.addWidget(self.storage_button)
+        self.local_ai_button = QPushButton("Local AI")
+        self.local_ai_button.setObjectName("localAIButton")
+        self.local_ai_button.setToolTip("Ask an explicitly selected local Ollama model to explain diagnostics")
+        self.local_ai_button.clicked.connect(self.request_local_ai_explanation)
+        actions_secondary.addWidget(self.local_ai_button)
+        self.export_button = QPushButton("Export report")
+        self.export_button.setObjectName("exportButton")
+        self.export_button.setToolTip("Save a local JSON diagnostics report")
+        self.export_button.clicked.connect(self.choose_report_destination)
+        actions_secondary.addWidget(self.export_button)
+        self.history_button = QPushButton("Save history")
+        self.history_button.setObjectName("historyButton")
+        self.history_button.setToolTip("Explicitly save this snapshot to a local SQLite history file")
+        self.history_button.clicked.connect(self.choose_history_destination)
+        actions_secondary.addWidget(self.history_button)
+        layout.addLayout(actions_primary)
+        layout.addLayout(actions_secondary)
 
         self._insight_label = QLabel()
         self._insight_label.setObjectName("insights")
@@ -290,25 +391,66 @@ class MainWindow(QMainWindow):
         self._footer.setObjectName("footer")
         layout.addWidget(self._footer)
 
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(root)
-        self.setCentralWidget(scroll)
+        layout.addStretch(1)
+        scroll.setWidget(content_host)
+        shell.addWidget(scroll, 1)
+        self.setCentralWidget(root)
         self.setStyleSheet("""
-            QMainWindow, QScrollArea, QWidget { background: #111820; color: #e7edf3; }
-            QLabel#title { font-size: 28px; font-weight: 700; letter-spacing: 2px; }
-            QLabel#subtitle, QLabel#metricLabel, QLabel#footer { color: #91a3b5; }
-            QLabel#subtitle { font-size: 10px; letter-spacing: 2px; margin-bottom: 12px; }
-            QWidget#metricCard { background: #1b2733; border: 1px solid #304252; border-radius: 8px; }
-            QLabel#metricLabel { font-size: 10px; font-weight: 700; }
-            QLabel#metricValue { font-size: 16px; font-weight: 600; padding-top: 5px; }
-            QLabel#status { color: #8fd3b2; padding: 12px 4px; }
-            QLabel#warning { color: #f0c674; }\n            QLabel#insights { color: #b9d7ed; padding: 8px 4px; }
-            QLabel#footer { font-size: 10px; padding-top: 10px; }
-            QPushButton#refreshButton { background: #29465b; border: 1px solid #52738c;
-                border-radius: 6px; padding: 8px 16px; font-weight: 600; }
-            QPushButton#refreshButton:hover { background: #365d78; }
-            QPushButton#refreshButton:disabled { color: #71808d; }
+            QMainWindow, QWidget#appRoot, QScrollArea#mainScroll, QWidget#contentHost {
+                background: #07111d; color: #e7f4ff;
+            }
+            QWidget#sidebar { background: #091827; border-right: 1px solid #17344b; }
+            QLabel#brand { color: #e8f8ff; font-size: 20px; font-weight: 800; letter-spacing: 2px; }
+            QLabel#brandSubtitle, QLabel#navHeading, QLabel#sideVersion {
+                color: #63849b; font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+            }
+            QLabel#navHeading { margin-bottom: 7px; }
+            QLabel#navItem {
+                color: #91aabd; background: #0d2030; border: 1px solid #142f43;
+                border-radius: 6px; padding: 10px 9px; font-size: 10px; font-weight: 700;
+                letter-spacing: 1px;
+            }
+            QLabel#safeIndicator { color: #54dfbd; font-size: 10px; font-weight: 700; padding: 8px 0; }
+            QLabel#eyebrow, QLabel#sectionNote {
+                color: #5daac7; font-size: 9px; font-weight: 700; letter-spacing: 1.8px;
+            }
+            QLabel#title { color: #f0f8ff; font-size: 28px; font-weight: 750; }
+            QLabel#subtitle { color: #7894a8; font-size: 11px; }
+            QWidget#heroPanel {
+                background: #0c2031; border: 1px solid #1b4c66; border-radius: 12px;
+            }
+            QLabel#coreOrb {
+                color: #8af5ff; background: #0a2639; border: 2px solid #27bad2;
+                border-radius: 56px; font-size: 44px; font-weight: 300;
+            }
+            QLabel#coreCaption { color: #62c9d8; font-size: 8px; font-weight: 800; letter-spacing: 2px; }
+            QLabel#heroKicker { color: #48d9c5; font-size: 9px; font-weight: 800; letter-spacing: 1.5px; }
+            QLabel#heroTitle { color: #e7f8ff; font-size: 20px; font-weight: 700; }
+            QLabel#heroDescription { color: #8aa9bc; font-size: 11px; }
+            QLabel#sectionTitle { color: #d9f0fb; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; }
+            QWidget#metricCard {
+                background: #0d1d2b; border: 1px solid #1b3b50; border-radius: 9px;
+            }
+            QWidget#metricCard:hover { border: 1px solid #2b8298; background: #102638; }
+            QLabel#metricLabel { color: #6f9aaf; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; }
+            QLabel#metricValue { color: #e5f5ff; font-size: 15px; font-weight: 650; padding-top: 3px; }
+            QLabel#status { color: #58d9b5; background: #0b282b; border: 1px solid #18514d;
+                border-radius: 6px; padding: 10px; font-size: 10px; }
+            QLabel#warning { color: #f0c674; padding: 4px; }
+            QLabel#insights {
+                color: #a9c8dc; background: #0c1b29; border: 1px solid #1b3548;
+                border-radius: 8px; padding: 12px; font-size: 11px;
+            }
+            QLabel#footer { color: #58768b; font-size: 9px; padding-top: 8px; }
+            QPushButton {
+                color: #cce7f5; background: #10283a; border: 1px solid #24506a;
+                border-radius: 6px; padding: 9px 12px; font-size: 10px; font-weight: 700;
+            }
+            QPushButton:hover { background: #153c53; border-color: #36a8c0; color: #f3fdff; }
+            QPushButton:pressed { background: #0b1b29; }
+            QPushButton:disabled { color: #5b7180; background: #101d28; border-color: #1a2c3a; }
+            QPushButton#refreshButton { color: #071820; background: #56d6d0; border-color: #56d6d0; }
+            QPushButton#refreshButton:hover { background: #7ce9e2; }
         """)
         self._apply_snapshot(snapshot)
 
