@@ -21,7 +21,7 @@ def explain_with_local_model(text: str, model: str, *, enabled: bool = False, ti
     prompt = (
         "Explain these Windows diagnostic observations in plain language. "
         "Do not recommend running commands, changing settings, deleting files, or disabling security. "
-        "State uncertainty and keep the answer under 180 words.\\n\\n"
+        "State uncertainty and keep the answer under 180 words.\n\n"
         + diagnostic_text
     )
     payload = json.dumps({
