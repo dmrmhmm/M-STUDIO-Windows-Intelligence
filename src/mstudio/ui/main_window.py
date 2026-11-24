@@ -91,6 +91,7 @@ class _RefreshSignals(QObject):
 class _RefreshWorker(QRunnable):
     def __init__(self, callback: Callable[[], SystemSnapshot]) -> None:
         super().__init__()
+        self.setAutoDelete(False)
         self.callback = callback
         self.signals = _RefreshSignals()
 
@@ -113,6 +114,7 @@ class _AuditSignals(QObject):
 class _AuditWorker(QRunnable):
     def __init__(self) -> None:
         super().__init__()
+        self.setAutoDelete(False)
         self.signals = _AuditSignals()
 
     @Slot()
@@ -128,6 +130,7 @@ class _AuditWorker(QRunnable):
 class _StorageWorker(QRunnable):
     def __init__(self) -> None:
         super().__init__()
+        self.setAutoDelete(False)
         self.signals = _AuditSignals()
 
     @Slot()
@@ -143,6 +146,7 @@ class _StorageWorker(QRunnable):
 class _LocalAIWorker(QRunnable):
     def __init__(self, prompt: str, model: str) -> None:
         super().__init__()
+        self.setAutoDelete(False)
         self.prompt = prompt
         self.model = model
         self.signals = _AuditSignals()
