@@ -48,6 +48,9 @@ If script activation is restricted, run the venv interpreter directly:
 .\.venv\Scripts\python.exe -m mstudio
 ```
 
+## Build a Windows portable package
+The `Windows portable package` workflow can be started manually from GitHub Actions or by pushing a `v*` tag. It builds a Windows x64 onedir application and publishes a ZIP artifact. This is a portable build, not yet a signed installer; a real Windows launch smoke test is still required.
+
 ## Run tests
 ```powershell
 python -m pytest
