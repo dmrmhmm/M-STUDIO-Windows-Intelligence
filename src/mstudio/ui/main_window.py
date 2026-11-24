@@ -407,7 +407,7 @@ class MainWindow(QMainWindow):
             hardware_text = f"Hardware inventory: unavailable ({hardware.get('reason', 'unknown reason')})"
         QMessageBox.information(
             self, "Read-only system audit",
-            "\n".join((driver_text, security_text, hardware_text, "No settings or drivers were changed.")),
+            f"{driver_text}\n{security_text}\n{hardware_text}\nNo settings or drivers were changed.",
         )
         self.audit_finished.emit(True)
 
