@@ -44,3 +44,26 @@ def test_disk_failure_does_not_discard_memory_metrics(monkeypatch):
     assert snapshot.memory_percent == 62.5
     assert snapshot.disk_total_bytes is None
     assert any("disk" in warning.lower() for warning in snapshot.warnings)
+
+
+def test_windows_snapshot_includes_bounded_os_metadata(monkeypatch):
+    import mstudio.core.diagnostics as diagnostics
+
+    monkeypatch.setattr(diagnostics.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(
+        diagnostics,
+        "get_windows_os_details",
+        lambda timeout_seconds: {
+            "Caption": "Microsoft Windows 11 Pro",
+            "Version": "10.0.26100",
+            "BuildNumber": "26100",
+            "OSArchitecture": "64-bit",
+        },
+    )
+
+    snapshot = diagnostics.collect_snapshot()
+
+    assert snapshot.os_caption == "Microsoft Windows 11 Pro"
+    assert snapshot.os_version == "10.0.26100"
+    assert snapshot.os_build == "26100"
+    assert snapshot.os_architecture == "64-bit"
