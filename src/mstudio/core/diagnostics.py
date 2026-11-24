@@ -28,7 +28,7 @@ def collect_snapshot() -> SystemSnapshot:
         snapshot.memory_percent = float(memory.percent)
     except (OSError, PermissionError) as exc:
         snapshot.warnings.append(f"Memory metrics could not be read: {exc}")
-    except Exception as exc:
+    except Exception as exc:  # Preserve partial diagnostics for unexpected provider errors.  # noqa: BLE001
         snapshot.warnings.append(f"Memory collection failed: {type(exc).__name__}: {exc}")
 
     try:
@@ -40,6 +40,6 @@ def collect_snapshot() -> SystemSnapshot:
         snapshot.disk_percent = float(disk.percent)
     except (OSError, PermissionError) as exc:
         snapshot.warnings.append(f"System disk metrics could not be read: {exc}")
-    except Exception as exc:
+    except Exception as exc:  # Preserve partial diagnostics for unexpected provider errors.  # noqa: BLE001
         snapshot.warnings.append(f"Disk collection failed: {type(exc).__name__}: {exc}")
     return snapshot
