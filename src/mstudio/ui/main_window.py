@@ -29,6 +29,7 @@ from mstudio.core.models import SystemSnapshot
 from mstudio.core.performance import collect_performance_sample
 from mstudio.core.reports import export_json_report
 from mstudio.core.storage import collect_storage_volumes
+from mstudio.ui.performance_dialog import LivePerformanceDialog
 
 
 def _format_bytes(value: int | None) -> str:
@@ -182,6 +183,11 @@ class MainWindow(QMainWindow):
         self.performance_button.setToolTip("Take one on-demand local performance sample")
         self.performance_button.clicked.connect(self.show_performance_sample)
         header.addWidget(self.performance_button)
+        self.live_performance_button = QPushButton("Live monitor")
+        self.live_performance_button.setObjectName("livePerformanceButton")
+        self.live_performance_button.setToolTip("Open a bounded 60-sample local performance monitor")
+        self.live_performance_button.clicked.connect(self.show_live_performance)
+        header.addWidget(self.live_performance_button)
         self.export_button = QPushButton("Export report")
         self.export_button.setObjectName("exportButton")
         self.export_button.setToolTip("Save a local JSON diagnostics report")
@@ -390,6 +396,11 @@ class MainWindow(QMainWindow):
             self, "Storage inventory", message + "\\n\\nRead-only inspection; no files were changed."
         )
         self.storage_finished.emit(True)
+
+    @Slot()
+    def show_live_performance(self) -> None:
+        dialog = LivePerformanceDialog(self)
+        dialog.exec()
 
     @Slot()
     def show_performance_sample(self) -> None:
