@@ -8,6 +8,6 @@ FEATURES = (
     ("drivers", "Driver and update audit", "read-only inventory foundation"),
     ("security", "Security and privacy center", "read-only Defender/firewall audit foundation"),
     ("ai", "AI-assisted explanations", "planned; optional opt-in provider, no telemetry"),
-    ("reports", "Diagnostics reports", "local JSON export foundation"),
+    ("reports", "Diagnostics reports", "local JSON export and explicit SQLite history"),
     ("maintenance", "Safe maintenance laboratory", "preview only; no execution"),
 )
