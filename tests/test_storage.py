@@ -1,10 +1,10 @@
+import psutil
+from types import SimpleNamespace
+
 from mstudio.core.storage import collect_storage_volumes
 
 
 def test_storage_inventory_is_bounded_and_skips_unavailable_volumes(monkeypatch):
-    import psutil
-    from types import SimpleNamespace
-
     partitions = [
         SimpleNamespace(mountpoint="/one", fstype="ext4"),
         SimpleNamespace(mountpoint="/one", fstype="ext4"),
