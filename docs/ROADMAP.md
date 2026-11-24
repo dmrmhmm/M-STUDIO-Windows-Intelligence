@@ -40,7 +40,7 @@
 - [x] 5. Bounded mounted-volume storage inventory; volume explorer and SMART remain.
 - [x] 6. Read-only Windows driver inventory foundation; update comparison remains.
 - [x] 7. Read-only Windows Defender/firewall status audit foundation; privacy review remains.
-- [ ] 8. Optional AI explanation provider; local-first, explicit opt-in, no telemetry.
+- [x] 8. Explicit opt-in local Ollama explanation provider; loopback-only, no telemetry.
 - [x] 9. Local JSON report generation foundation.
 - [x] 10. Maintenance preview contract; no action execution.
 
