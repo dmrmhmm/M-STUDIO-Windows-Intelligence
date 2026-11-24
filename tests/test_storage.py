@@ -1,5 +1,6 @@
-import psutil
 from types import SimpleNamespace
+
+import psutil
 
 from mstudio.core.storage import collect_storage_volumes
 
@@ -32,9 +33,6 @@ def test_storage_inventory_is_bounded_and_skips_unavailable_volumes(monkeypatch)
 
 
 def test_storage_limit_is_clamped(monkeypatch):
-    import psutil
-    from types import SimpleNamespace
-
     monkeypatch.setattr(
         psutil, "disk_partitions",
         lambda all=False: [SimpleNamespace(mountpoint=f"/{i}", fstype="test") for i in range(40)],
