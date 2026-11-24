@@ -1,0 +1,33 @@
+name: Windows portable package
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install application and packager
+        run: python -m pip install -e ".[packaging]"
+      - name: Build portable desktop application
+        run: >-
+          python -m PyInstaller --noconfirm --clean --windowed --onedir
+          --name MStudio-Windows --paths src src/mstudio/__main__.py
+      - name: Create portable ZIP
+        shell: pwsh
+        run: Compress-Archive -Path dist/MStudio-Windows/* -DestinationPath dist/MStudio-Windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MStudio-Windows-x64
+          path: dist/MStudio-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 14
