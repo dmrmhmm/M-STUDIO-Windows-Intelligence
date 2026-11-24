@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from PySide6.QtCore import QRunnable, Qt, QThreadPool, Signal, Slot
+from PySide6.QtCore import QObject, QRunnable, Qt, QThreadPool, Signal, Slot
 from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
@@ -15,8 +15,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PySide6.QtCore import QObject
-
 from mstudio.core.diagnostics import collect_snapshot
 from mstudio.core.models import SystemSnapshot
 
@@ -33,8 +31,19 @@ def _format_bytes(value: int | None) -> str:
 
 
 def _snapshot_values(snapshot: SystemSnapshot) -> dict[str, str]:
+    os_name = snapshot.os_caption or snapshot.operating_system
+    os_details = " · ".join(
+        value
+        for value in (
+            f"Version {snapshot.os_version}" if snapshot.os_version else "",
+            f"Build {snapshot.os_build}" if snapshot.os_build else "",
+            snapshot.os_architecture,
+        )
+        if value
+    )
+    operating_system = f"{os_name}\\n{os_details}" if os_details else os_name
     return {
-        "OPERATING SYSTEM": snapshot.operating_system,
+        "OPERATING SYSTEM": operating_system,
         "DEVICE": snapshot.hostname,
         "PROCESSOR": snapshot.processor or "Unavailable",
         "LOGICAL CORES": str(snapshot.logical_cores or "Unavailable"),
