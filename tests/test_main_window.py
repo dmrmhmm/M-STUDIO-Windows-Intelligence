@@ -1,6 +1,5 @@
 import json
 import sqlite3
-from types import SimpleNamespace
 
 from PySide6.QtCore import QEventLoop, QThreadPool, QTimer
 from PySide6.QtWidgets import QLabel
