@@ -1,7 +1,7 @@
 """Typed, serialization-friendly diagnostics models."""
 
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -15,7 +15,7 @@ class Metric:
 @dataclass(slots=True)
 class SystemSnapshot:
     collected_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat(timespec="seconds")
+        default_factory=lambda: datetime.now(UTC).isoformat(timespec="seconds")
     )
     operating_system: str = "Unknown"
     hostname: str = "Unknown"
