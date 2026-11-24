@@ -6,6 +6,7 @@ from typing import Any
 
 from mstudio.adapters.powershell import (
     get_windows_driver_inventory,
+    get_windows_hardware_inventory,
     get_windows_security_status,
 )
 
@@ -26,3 +27,12 @@ def audit_security() -> dict[str, Any]:
     if status is None:
         return {"available": False, "reason": "Defender/firewall status is unavailable on this system."}
     return {"available": True, "status": status}
+
+
+def audit_hardware() -> dict[str, Any]:
+    if platform.system() != "Windows":
+        return {"available": False, "reason": "Hardware inventory is currently Windows-only."}
+    inventory = get_windows_hardware_inventory(timeout_seconds=10)
+    if inventory is None:
+        return {"available": False, "reason": "BIOS, baseboard, or graphics metadata is unavailable."}
+    return {"available": True, "inventory": inventory}
