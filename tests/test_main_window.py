@@ -164,3 +164,19 @@ def test_storage_button_reports_read_only_volume_inventory(qapp, monkeypatch):
     assert window.storage_button.isEnabled()
     assert "50.0% used" in messages[0][2]
     assert "no files were changed" in messages[0][2].lower()
+
+
+def test_history_button_saves_only_to_user_selected_local_path(qapp, tmp_path, monkeypatch):
+    import sqlite3
+    from mstudio.ui import main_window
+
+    destination = tmp_path / "chosen-history.sqlite3"
+    messages = []
+    monkeypatch.setattr(main_window.QMessageBox, "information", lambda *args: messages.append(args))
+    window = MainWindow(SystemSnapshot(hostname="history-host"))
+    window.save_history(str(destination))
+    assert destination.exists()
+    with sqlite3.connect(destination) as connection:
+        payload = connection.execute("SELECT payload FROM snapshots").fetchone()[0]
+    assert "history-host" in payload
+    assert "30 days / 1,000 records" in messages[0][2]
