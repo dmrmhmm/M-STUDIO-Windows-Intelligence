@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
 from mstudio.core.diagnostics import collect_snapshot
 from mstudio.core.models import SystemSnapshot
 
