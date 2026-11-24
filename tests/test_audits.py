@@ -37,3 +37,23 @@ def test_audit_does_not_claim_missing_data_is_safe(monkeypatch):
     result = audits.audit_security()
     assert result["available"] is False
     assert "unavailable" in result["reason"].lower()
+
+
+def test_hardware_query_is_fixed_and_omits_serial_identifiers(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        powershell, "_run_fixed_query",
+        lambda command, timeout_seconds: calls.append((command, timeout_seconds)) or {"BIOS": {}, "Baseboard": {}, "Graphics": []},
+    )
+    result = powershell.get_windows_hardware_inventory(timeout_seconds=99)
+    assert result["Graphics"] == []
+    assert calls[0][1] == 99
+    assert "Win32_BIOS" in calls[0][0]
+    assert "Win32_BaseBoard" in calls[0][0]
+    assert "Win32_VideoController" in calls[0][0]
+    assert "SerialNumber" not in calls[0][0]
+
+
+def test_hardware_audit_reports_unsupported_platform(monkeypatch):
+    monkeypatch.setattr(audits.platform, "system", lambda: "Linux")
+    assert audits.audit_hardware()["available"] is False
