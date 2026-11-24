@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from mstudio.core.audits import audit_drivers, audit_security
 from mstudio.core.diagnostics import collect_snapshot
 from mstudio.core.explanations import explain_metric
+from mstudio.core.history import save_snapshot_history
 from mstudio.core.insights import assess_health, build_recommendations
 from mstudio.core.models import SystemSnapshot
 from mstudio.core.performance import collect_performance_sample
@@ -194,6 +195,11 @@ class MainWindow(QMainWindow):
         self.storage_button.setToolTip("Inspect mounted volume capacity without changing files")
         self.storage_button.clicked.connect(self.inspect_storage)
         header.addWidget(self.storage_button)
+        self.history_button = QPushButton("Save history")
+        self.history_button.setObjectName("historyButton")
+        self.history_button.setToolTip("Explicitly save this snapshot to a local SQLite history file")
+        self.history_button.clicked.connect(self.choose_history_destination)
+        header.addWidget(self.history_button)
         layout.addLayout(header)
 
         grid_host = QWidget()
@@ -397,6 +403,27 @@ class MainWindow(QMainWindow):
             "Performance snapshot",
             "\\n".join((*values, f"Collected: {sample.collected_at}")),
         )
+
+    @Slot()
+    def choose_history_destination(self) -> None:
+        destination, _ = QFileDialog.getSaveFileName(
+            self, "Save local diagnostics history", "mstudio-history.sqlite3",
+            "SQLite database (*.sqlite3)",
+        )
+        if destination:
+            self.save_history(destination)
+
+    def save_history(self, destination: str) -> None:
+        """Persist the current snapshot only after the user chooses a local file."""
+        try:
+            count = save_snapshot_history(self._current_snapshot, destination)
+        except (OSError, ValueError) as exc:
+            QMessageBox.warning(self, "History save failed", f"Could not save local history: {exc}")
+        else:
+            QMessageBox.information(
+                self, "History saved",
+                f"Saved locally. {count} record(s) retained; default retention is 30 days / 1,000 records.",
+            )
 
     @Slot()
     def choose_report_destination(self) -> None:
