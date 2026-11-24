@@ -121,6 +121,7 @@ class _AuditWorker(QRunnable):
 
 class MainWindow(QMainWindow):
     refresh_finished = Signal(bool)
+    audit_finished = Signal(bool)
 
     def __init__(
         self,
@@ -300,6 +301,7 @@ class MainWindow(QMainWindow):
         self.audit_button.setText("System audit")
         if not isinstance(result, dict) or error is not None:
             QMessageBox.warning(self, "System audit unavailable", str(error or "Unexpected audit result"))
+            self.audit_finished.emit(False)
             return
 
         drivers = result["drivers"]
