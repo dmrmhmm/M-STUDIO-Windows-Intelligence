@@ -115,6 +115,10 @@ def test_system_audit_runs_off_ui_thread_and_reports_read_only_result(qapp, monk
         main_window, "audit_security",
         lambda: {"available": True, "status": {"Defender": {}, "Firewall": [{"Name": "Domain"}]}},
     )
+    monkeypatch.setattr(
+        main_window, "audit_hardware",
+        lambda: {"available": True, "inventory": {"BIOS": {"Manufacturer": "Test BIOS", "SMBIOSBIOSVersion": "1.0"}, "Baseboard": {"Manufacturer": "BoardCo", "Product": "Model X"}, "Graphics": [{"Name": "Test GPU"}]}},
+    )
     messages = []
     monkeypatch.setattr(
         main_window.QMessageBox, "information",
@@ -133,6 +137,7 @@ def test_system_audit_runs_off_ui_thread_and_reports_read_only_result(qapp, monk
     assert outcomes == [True]
     assert window.audit_button.isEnabled()
     assert "12 entries" in messages[0][2]
+    assert "Test GPU" in messages[0][2]
     assert "No settings or drivers were changed." in messages[0][2]
 
 
