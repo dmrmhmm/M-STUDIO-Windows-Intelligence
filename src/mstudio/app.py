@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import platform
 import sys
 
-from mstudio.core.diagnostics import collect_snapshot
+from mstudio.core.models import SystemSnapshot
 
 
 def main() -> int:
@@ -19,6 +20,14 @@ def main() -> int:
     app = QApplication(sys.argv)
     app.setApplicationName("M / STUDIO Windows Intelligence")
     app.setOrganizationName("M-STUDIO")
-    window = MainWindow(collect_snapshot())
+
+    initial_snapshot = SystemSnapshot(
+        operating_system=f"{platform.system()} {platform.release()}".strip(),
+        hostname=platform.node() or "Unknown",
+        processor=platform.processor() or "Detecting…",
+        warnings=["Initial read-only inventory is running in the background."],
+    )
+    window = MainWindow(initial_snapshot)
     window.show()
+    window.refresh_snapshot()
     return app.exec()
