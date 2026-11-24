@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 from collections.abc import Callable
 
 from PySide6.QtCore import QObject, QRunnable, Qt, QThreadPool, Signal, Slot
@@ -417,7 +419,7 @@ class MainWindow(QMainWindow):
         """Persist the current snapshot only after the user chooses a local file."""
         try:
             count = save_snapshot_history(self._current_snapshot, destination)
-        except (OSError, ValueError) as exc:
+        except (OSError, ValueError, sqlite3.Error) as exc:
             QMessageBox.warning(self, "History save failed", f"Could not save local history: {exc}")
         else:
             QMessageBox.information(
