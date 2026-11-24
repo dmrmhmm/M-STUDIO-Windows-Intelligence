@@ -69,3 +69,37 @@ def test_refresh_rejects_non_snapshot_result(qapp):
     assert not _wait_for_refresh(window)
     assert _metric_label(window, "DEVICE").text() == "unchanged"
     assert "TypeError" in window.findChild(QLabel, "warning").text()
+
+
+
+def test_export_report_uses_latest_snapshot(qapp, tmp_path, monkeypatch):
+    import json
+    from mstudio.ui import main_window
+
+    window = MainWindow(SystemSnapshot(hostname="report-host"))
+    messages = []
+    monkeypatch.setattr(main_window.QMessageBox, "information",
+                        lambda *args: messages.append(args))
+    destination = tmp_path / "dashboard-report.json"
+    window.export_report(str(destination))
+
+    report = json.loads(destination.read_text(encoding="utf-8"))
+    assert report["snapshot"]["hostname"] == "report-host"
+    assert messages
+
+
+def test_performance_button_uses_single_local_sample(qapp, monkeypatch):
+    from mstudio.core.performance import PerformanceSample
+    from mstudio.ui import main_window
+
+    window = MainWindow(SystemSnapshot())
+    shown = []
+    monkeypatch.setattr(
+        main_window, "collect_performance_sample",
+        lambda: PerformanceSample("2026-11-24T00:00:00+00:00", 10.0, 20.0, 30.0),
+    )
+    monkeypatch.setattr(main_window.QMessageBox, "information",
+                        lambda *args: shown.append(args))
+    window.show_performance_sample()
+    assert shown
+    assert "CPU: 10.0%" in shown[0][2]
