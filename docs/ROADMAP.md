@@ -11,7 +11,7 @@
 - [ ] Windows 10 and Windows 11 smoke tests.
 - [ ] Add structured logging with local opt-in.
 - [x] Add manual refresh action and update collection timestamp.
-- [x] Run refresh collection on a bounded Qt worker thread.
+- [x] Run startup and refresh collection on a bounded Qt worker thread.
 - [x] Keep the last valid dashboard visible when refresh fails.
 - [x] Expose stable widget identifiers for UI-level tests.
 - [x] Collect optional Windows edition, version, build, and architecture.
