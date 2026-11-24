@@ -7,7 +7,7 @@
 4. **Tests**: portable tests validate the model, adapters, refresh lifecycle, and core behavior on Windows and Ubuntu.
 
 ## Data flow
-Application startup -> collect read-only snapshot -> construct typed model -> render dashboard.
+Application startup -> render a lightweight platform placeholder -> start bounded background collection -> queued Qt signal -> update dashboard on the UI thread.
 Manual refresh -> bounded worker -> read-only provider -> queued Qt signal -> update dashboard on the UI thread.
 
 ## Trust boundaries
