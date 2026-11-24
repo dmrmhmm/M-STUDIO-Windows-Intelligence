@@ -108,3 +108,35 @@ def test_dashboard_displays_explainable_recommendations(qapp):
     assert insights is not None
     assert "Review memory usage" in insights.text()
     assert "Memory pressure is elevated" in insights.text()
+
+
+def test_system_audit_runs_off_ui_thread_and_reports_read_only_result(qapp, monkeypatch):
+    from mstudio.ui import main_window
+
+    monkeypatch.setattr(
+        main_window, "audit_drivers",
+        lambda: {"available": True, "count": 12, "drivers": []},
+    )
+    monkeypatch.setattr(
+        main_window, "audit_security",
+        lambda: {"available": True, "status": {"Defender": {}, "Firewall": [{"Name": "Domain"}]}},
+    )
+    messages = []
+    monkeypatch.setattr(
+        main_window.QMessageBox, "information",
+        lambda *args: messages.append(args),
+    )
+    window = MainWindow(SystemSnapshot())
+    loop = QEventLoop()
+    outcomes = []
+    window.audit_finished.connect(lambda success: (outcomes.append(success), loop.quit()))
+
+    window.run_system_audit()
+    assert not window.audit_button.isEnabled()
+    QTimer.singleShot(5000, loop.quit)
+    loop.exec()
+
+    assert outcomes == [True]
+    assert window.audit_button.isEnabled()
+    assert "12 entries" in messages[0][2]
+    assert "No settings or drivers were changed." in messages[0][2]
