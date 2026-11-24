@@ -1,14 +1,8 @@
-import pytest
 from PySide6.QtCore import QEventLoop, QThreadPool, QTimer
-from PySide6.QtWidgets import QApplication, QLabel
+from PySide6.QtWidgets import QLabel
 
 from mstudio.core.models import SystemSnapshot
 from mstudio.ui.main_window import MainWindow
-
-
-@pytest.fixture(scope="module")
-def qapp():
-    return QApplication.instance() or QApplication([])
 
 
 def _metric_label(window: MainWindow, metric_key: str) -> QLabel:
