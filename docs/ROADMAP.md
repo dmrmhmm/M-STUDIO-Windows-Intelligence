@@ -30,7 +30,7 @@
 - [x] Add non-executing maintenance preview contract.
 - [x] Add local metric explanations as dashboard tooltips.
 - [ ] Add recommendation detail views.
-- [ ] Add optional local-only history with retention controls.
+- [x] Add opt-in local-only SQLite history with bounded retention (30 days / 1,000 records by default).
 
 ## Phase 0.4 - Ten intelligence modules
 - [x] 1. System health engine foundation.
