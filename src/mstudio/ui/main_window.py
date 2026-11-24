@@ -1,10 +1,10 @@
-"""Minimal, accessible diagnostics dashboard with explicit refresh."""
+"""Minimal, accessible diagnostics dashboard with background refresh."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QRunnable, Qt, QThreadPool, Signal, Slot
 from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from PySide6.QtCore import QObject
 
 from mstudio.core.diagnostics import collect_snapshot
 from mstudio.core.models import SystemSnapshot
@@ -58,7 +59,31 @@ def _snapshot_values(snapshot: SystemSnapshot) -> dict[str, str]:
     }
 
 
+class _RefreshSignals(QObject):
+    finished = Signal(object, object)
+
+
+class _RefreshWorker(QRunnable):
+    def __init__(self, callback: Callable[[], SystemSnapshot]) -> None:
+        super().__init__()
+        self.callback = callback
+        self.signals = _RefreshSignals()
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            snapshot = self.callback()
+            if not isinstance(snapshot, SystemSnapshot):
+                raise TypeError("Refresh provider must return a SystemSnapshot.")
+        except Exception as exc:  # Convert provider failures into UI-safe results.  # noqa: BLE001
+            self.signals.finished.emit(None, f"{type(exc).__name__}: {exc}")
+        else:
+            self.signals.finished.emit(snapshot, None)
+
+
 class MainWindow(QMainWindow):
+    refresh_finished = Signal(bool)
+
     def __init__(
         self,
         snapshot: SystemSnapshot,
@@ -66,6 +91,7 @@ class MainWindow(QMainWindow):
     ) -> None:
         super().__init__()
         self._refresh_callback = refresh_callback
+        self._refresh_worker: _RefreshWorker | None = None
         self.setWindowTitle("M / STUDIO | Windows Intelligence")
         self.resize(900, 620)
         self.setMinimumSize(640, 460)
@@ -101,6 +127,7 @@ class MainWindow(QMainWindow):
             heading.setObjectName("metricLabel")
             content = QLabel(value)
             content.setObjectName("metricValue")
+            content.setProperty("metricKey", label)
             content.setWordWrap(True)
             self._value_labels[label] = content
             card_layout.addWidget(heading)
@@ -149,21 +176,31 @@ class MainWindow(QMainWindow):
     def _apply_snapshot(self, snapshot: SystemSnapshot) -> None:
         for label, value in _snapshot_values(snapshot).items():
             self._value_labels[label].setText(value)
-        self._warning_label.setText("\n".join(snapshot.warnings))
+        self._warning_label.setText("\\n".join(snapshot.warnings))
         self._footer.setText(
             f"Collected: {snapshot.collected_at}  |  M / STUDIO 0.1.0"
         )
 
+    @Slot()
     def refresh_snapshot(self) -> None:
-        """Refresh displayed metrics without changing system state."""
+        """Collect a snapshot on the shared Qt thread pool without blocking the UI."""
+        if self._refresh_worker is not None:
+            return
         self.refresh_button.setEnabled(False)
         self.refresh_button.setText("Refreshing…")
-        try:
-            self._apply_snapshot(self._refresh_callback())
-        except Exception as exc:  # Keep the dashboard usable on provider errors.  # noqa: BLE001
-            self._warning_label.setText(
-                f"Refresh failed: {type(exc).__name__}: {exc}"
-            )
-        finally:
-            self.refresh_button.setText("Refresh")
-            self.refresh_button.setEnabled(True)
+        worker = _RefreshWorker(self._refresh_callback)
+        worker.signals.finished.connect(self._finish_refresh)
+        self._refresh_worker = worker
+        QThreadPool.globalInstance().start(worker)
+
+    @Slot(object, object)
+    def _finish_refresh(self, snapshot: object, error: object) -> None:
+        succeeded = isinstance(snapshot, SystemSnapshot) and error is None
+        if succeeded:
+            self._apply_snapshot(snapshot)
+        else:
+            self._warning_label.setText(f"Refresh failed: {error or 'Unknown provider error'}")
+        self._refresh_worker = None
+        self.refresh_button.setText("Refresh")
+        self.refresh_button.setEnabled(True)
+        self.refresh_finished.emit(succeeded)
