@@ -23,7 +23,7 @@ A lightweight Windows 10/11 desktop companion for system visibility, diagnostics
 - On-demand performance snapshot, bounded live monitor, and local JSON report export.
 - Explicitly enabled local SQLite history with bounded retention (30 days / 1,000 records by default).
 - Optional AI explanations through a user-selected Ollama model on loopback only; disabled unless explicitly invoked.
-- Read-only driver and Defender/firewall inventory on Windows.
+- Read-only driver, Defender/firewall, BIOS, baseboard, and graphics inventory on Windows; serial identifiers are excluded.
 - Bounded mounted-volume storage inventory; inaccessible volumes are skipped and no files are modified.
 - Small modular architecture suitable for low-resource Windows PCs.
 
