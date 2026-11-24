@@ -160,7 +160,7 @@ class MainWindow(QMainWindow):
         self.refresh_button.setText("Refreshing…")
         try:
             self._apply_snapshot(self._refresh_callback())
-        except Exception as exc:  # Keep the existing dashboard usable on refresh errors.
+        except Exception as exc:  # Keep the dashboard usable on provider errors.  # noqa: BLE001
             self._warning_label.setText(
                 f"Refresh failed: {type(exc).__name__}: {exc}"
             )
