@@ -19,6 +19,10 @@ A lightweight Windows 10/11 desktop companion for system visibility, diagnostics
 - Optional Windows edition, version, build, architecture, and processor identification through fixed, read-only CIM queries.
 - Cross-platform fallback for development and automated tests.
 - Structured diagnostics model with collection timestamps and warnings.
+- Transparent health scoring and advisory-only recommendations.
+- On-demand performance snapshot and local JSON report export.
+- Read-only driver and Defender/firewall inventory on Windows.
+- Bounded mounted-volume storage inventory; inaccessible volumes are skipped and no files are modified.
 - Small modular architecture suitable for low-resource Windows PCs.
 
 ## Requirements
@@ -58,7 +62,7 @@ python -m pytest
 No API key, cloud account, or administrator permission is required. No telemetry is sent. The initial version does not connect to a remote AI service.
 
 ## Status and limitations
-This is an early foundation, not a system optimizer or repair utility. Metrics depend on the host OS and available permissions. Disk usage is reported for the current system volume only. Windows-specific CIM details are optional and gracefully fall back when PowerShell is unavailable. Manual refresh runs in a background worker and does not block the dashboard.
+This is an early foundation, not a system optimizer or repair utility. Metrics depend on the host OS and available permissions. Disk usage is reported for the current system volume only. Windows-specific CIM details are optional and gracefully fall back when PowerShell is unavailable. Manual refresh, storage inventory, and Windows system audit run in background workers and do not block the dashboard. Storage inventory is limited to at most 32 mounted volumes per scan. Driver and security data are informational snapshots, not update recommendations or a complete security assessment.
 
 ## License
 MIT. See [LICENSE](LICENSE). Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
