@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import platform
 
-from mstudio.adapters.powershell import get_windows_os_details
+from mstudio.adapters.powershell import get_windows_os_details, get_windows_processor_name
 from mstudio.core.models import SystemSnapshot
 
 
@@ -22,6 +22,8 @@ def collect_snapshot() -> SystemSnapshot:
             snapshot.os_version = str(windows_details.get("Version") or "")
             snapshot.os_build = str(windows_details.get("BuildNumber") or "")
             snapshot.os_architecture = str(windows_details.get("OSArchitecture") or "")
+        if snapshot.processor == "Unknown":
+            snapshot.processor = get_windows_processor_name(timeout_seconds=3) or "Unknown"
 
     try:
         import psutil
