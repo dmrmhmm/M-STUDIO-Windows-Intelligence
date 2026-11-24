@@ -11,9 +11,14 @@
 - [ ] Windows 10 and Windows 11 smoke tests.
 - [ ] Add structured logging with local opt-in.
 - [x] Add manual refresh action and update collection timestamp.
+- [x] Run refresh collection on a bounded Qt worker thread.
+- [x] Keep the last valid dashboard visible when refresh fails.
+- [x] Expose stable widget identifiers for UI-level tests.
+- [x] Collect optional Windows edition, version, build, and architecture.
+- [x] Fall back to a fixed CIM query when the processor name is unavailable.
 - [ ] Add disk-volume selection with safe defaults.
 - [ ] Add accessibility and high-DPI review.
-- [ ] Verify refresh behavior in Windows and Ubuntu CI.
+- [ ] Verify all refresh and metadata behavior in Windows and Ubuntu CI.
 
 ## Phase 0.3 - Insight
 - [ ] Explain metrics in plain language.
