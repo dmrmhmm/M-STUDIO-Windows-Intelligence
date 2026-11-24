@@ -1,5 +1,5 @@
 import pytest
-from PySide6.QtCore import QEventLoop, QTimer
+from PySide6.QtCore import QEventLoop, QThreadPool, QTimer
 from PySide6.QtWidgets import QApplication, QLabel
 
 from mstudio.core.models import SystemSnapshot
@@ -133,8 +133,8 @@ def test_system_audit_runs_off_ui_thread_and_reports_read_only_result(qapp, monk
 
     window.run_system_audit()
     assert not window.audit_button.isEnabled()
-    QTimer.singleShot(5000, loop.quit)
-    loop.exec()
+    assert QThreadPool.globalInstance().waitForDone(5000)
+    qapp.processEvents()
 
     assert outcomes == [True]
     assert window.audit_button.isEnabled()
