@@ -7,7 +7,7 @@ FEATURES = (
     ("storage", "Disk and storage analysis", "system-volume metrics"),
     ("drivers", "Driver and update audit", "read-only inventory foundation"),
     ("security", "Security and privacy center", "read-only Defender/firewall audit foundation"),
-    ("ai", "AI-assisted explanations", "planned; optional opt-in provider, no telemetry"),
+    ("ai", "AI-assisted explanations", "explicit opt-in local Ollama loopback provider"),
     ("reports", "Diagnostics reports", "local JSON export and explicit SQLite history"),
     ("maintenance", "Safe maintenance laboratory", "preview only; no execution"),
 )
