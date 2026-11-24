@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QFileDialog,
     QMessageBox,
+    QInputDialog,
     QPushButton,
     QScrollArea,
     QVBoxLayout,
@@ -25,6 +26,7 @@ from mstudio.core.diagnostics import collect_snapshot
 from mstudio.core.explanations import explain_metric
 from mstudio.core.history import save_snapshot_history
 from mstudio.core.insights import assess_health, build_recommendations
+from mstudio.core.local_ai import explain_with_local_model
 from mstudio.core.models import SystemSnapshot
 from mstudio.core.performance import collect_performance_sample
 from mstudio.core.reports import export_json_report
@@ -139,10 +141,28 @@ class _StorageWorker(QRunnable):
             self.signals.finished.emit(volumes, None)
 
 
+class _LocalAIWorker(QRunnable):
+    def __init__(self, prompt: str, model: str) -> None:
+        super().__init__()
+        self.prompt = prompt
+        self.model = model
+        self.signals = _AuditSignals()
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            explanation = explain_with_local_model(self.prompt, self.model, enabled=True)
+        except Exception as exc:  # Convert provider failures into UI-safe results.  # noqa: BLE001
+            self.signals.finished.emit(None, f"{type(exc).__name__}: {exc}")
+        else:
+            self.signals.finished.emit(explanation, None)
+
+
 class MainWindow(QMainWindow):
     refresh_finished = Signal(bool)
     audit_finished = Signal(bool)
     storage_finished = Signal(bool)
+    local_ai_finished = Signal(bool)
 
     def __init__(
         self,
@@ -155,6 +175,7 @@ class MainWindow(QMainWindow):
         self._refresh_worker: _RefreshWorker | None = None
         self._audit_worker: _AuditWorker | None = None
         self._storage_worker: _StorageWorker | None = None
+        self._local_ai_worker: _LocalAIWorker | None = None
         self.setWindowTitle("M / STUDIO | Windows Intelligence")
         self.resize(900, 620)
         self.setMinimumSize(640, 460)
@@ -208,6 +229,11 @@ class MainWindow(QMainWindow):
         self.history_button.setToolTip("Explicitly save this snapshot to a local SQLite history file")
         self.history_button.clicked.connect(self.choose_history_destination)
         header.addWidget(self.history_button)
+        self.local_ai_button = QPushButton("Local AI")
+        self.local_ai_button.setObjectName("localAIButton")
+        self.local_ai_button.setToolTip("Ask an explicitly selected local Ollama model to explain diagnostics")
+        self.local_ai_button.clicked.connect(self.request_local_ai_explanation)
+        header.addWidget(self.local_ai_button)
         layout.addLayout(header)
 
         grid_host = QWidget()
@@ -416,6 +442,42 @@ class MainWindow(QMainWindow):
             "Performance snapshot",
             "\\n".join((*values, f"Collected: {sample.collected_at}")),
         )
+
+    @Slot()
+    def request_local_ai_explanation(self) -> None:
+        if self._local_ai_worker is not None:
+            return
+        model, accepted = QInputDialog.getText(
+            self, "Local AI explanation",
+            "Installed Ollama model name (local service only):",
+        )
+        if not accepted or not model.strip():
+            return
+        snapshot = self._current_snapshot
+        prompt = "\\n".join((
+            f"System health: {assess_health(snapshot).score}/100 ({assess_health(snapshot).status})",
+            f"Memory usage: {snapshot.memory_percent if snapshot.memory_percent is not None else 'unavailable'}%",
+            f"System disk usage: {snapshot.disk_percent if snapshot.disk_percent is not None else 'unavailable'}%",
+            *snapshot.warnings,
+        ))[:2000]
+        self.local_ai_button.setEnabled(False)
+        self.local_ai_button.setText("Explaining…")
+        worker = _LocalAIWorker(prompt, model.strip())
+        worker.signals.finished.connect(self._finish_local_ai)
+        self._local_ai_worker = worker
+        QThreadPool.globalInstance().start(worker)
+
+    @Slot(object, object)
+    def _finish_local_ai(self, explanation: object, error: object) -> None:
+        self._local_ai_worker = None
+        self.local_ai_button.setEnabled(True)
+        self.local_ai_button.setText("Local AI")
+        if not isinstance(explanation, str) or error is not None:
+            QMessageBox.warning(self, "Local AI unavailable", str(error or "No explanation returned"))
+            self.local_ai_finished.emit(False)
+            return
+        QMessageBox.information(self, "Local AI explanation", explanation)
+        self.local_ai_finished.emit(True)
 
     @Slot()
     def choose_history_destination(self) -> None:
