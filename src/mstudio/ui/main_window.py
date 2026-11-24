@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from mstudio.core.audits import audit_drivers, audit_security
+from mstudio.core.audits import audit_drivers, audit_hardware, audit_security
 from mstudio.core.diagnostics import collect_snapshot
 from mstudio.core.explanations import explain_metric
 from mstudio.core.history import save_snapshot_history
@@ -120,7 +120,7 @@ class _AuditWorker(QRunnable):
     @Slot()
     def run(self) -> None:
         try:
-            result = {"drivers": audit_drivers(), "security": audit_security()}
+            result = {"drivers": audit_drivers(), "security": audit_security(), "hardware": audit_hardware()}
         except Exception as exc:  # Convert audit provider failures into UI-safe results.  # noqa: BLE001
             self.signals.finished.emit(None, f"{type(exc).__name__}: {exc}")
         else:
@@ -376,6 +376,7 @@ class MainWindow(QMainWindow):
 
         drivers = result["drivers"]
         security = result["security"]
+        hardware = result["hardware"]
         driver_text = (
             f"Driver inventory: {drivers['count']} entries"
             if drivers.get("available")
@@ -391,9 +392,22 @@ class MainWindow(QMainWindow):
             )
         else:
             security_text = f"Security audit: unavailable ({security.get('reason', 'unknown reason')})"
+        if hardware.get("available"):
+            inventory = hardware["inventory"]
+            bios = inventory.get("BIOS") or {}
+            board = inventory.get("Baseboard") or {}
+            graphics = inventory.get("Graphics") or []
+            graphics_names = [item.get("Name", "Unknown GPU") for item in graphics if isinstance(item, dict)]
+            hardware_text = (
+                f"BIOS: {bios.get('Manufacturer', 'Unknown')} / {bios.get('SMBIOSBIOSVersion', 'Unknown')}; "
+                f"board: {board.get('Manufacturer', 'Unknown')} {board.get('Product', '')}; "
+                f"graphics: {', '.join(graphics_names) if graphics_names else 'unavailable'}"
+            )
+        else:
+            hardware_text = f"Hardware inventory: unavailable ({hardware.get('reason', 'unknown reason')})"
         QMessageBox.information(
             self, "Read-only system audit",
-            "\n".join((driver_text, security_text, "No settings or drivers were changed.")),
+            "\n".join((driver_text, security_text, hardware_text, "No settings or drivers were changed.")),
         )
 
     @Slot()
