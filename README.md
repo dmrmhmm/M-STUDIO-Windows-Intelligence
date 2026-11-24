@@ -20,7 +20,7 @@ A lightweight Windows 10/11 desktop companion for system visibility, diagnostics
 - Cross-platform fallback for development and automated tests.
 - Structured diagnostics model with collection timestamps and warnings.
 - Transparent health scoring and advisory-only recommendations.
-- On-demand performance snapshot and local JSON report export.
+- On-demand performance snapshot, bounded live monitor, and local JSON report export.
 - Explicitly enabled local SQLite history with bounded retention (30 days / 1,000 records by default).
 - Read-only driver and Defender/firewall inventory on Windows.
 - Bounded mounted-volume storage inventory; inaccessible volumes are skipped and no files are modified.
