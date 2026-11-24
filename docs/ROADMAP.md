@@ -16,7 +16,8 @@
 - [x] Expose stable widget identifiers for UI-level tests.
 - [x] Collect optional Windows edition, version, build, and architecture.
 - [x] Fall back to a fixed CIM query when the processor name is unavailable.
-- [ ] Add disk-volume selection with safe defaults.
+- [x] Add bounded read-only inventory for up to 32 mounted disk volumes.
+- [ ] Add user-selectable volume focus and SMART health where safely available.
 - [ ] Add accessibility and high-DPI review.
 - [ ] Verify all refresh and metadata behavior in Windows and Ubuntu CI.
 
@@ -27,7 +28,8 @@
 - [x] Add non-blocking, on-demand performance sampling foundation.
 - [x] Add local JSON report generation foundation (only on explicit invocation).
 - [x] Add non-executing maintenance preview contract.
-- [ ] Add metric explanations and recommendation detail views.
+- [x] Add local metric explanations as dashboard tooltips.
+- [ ] Add recommendation detail views.
 - [ ] Add optional local-only history with retention controls.
 
 ## Phase 0.4 - Ten intelligence modules
@@ -35,7 +37,7 @@
 - [x] 2. Performance sampling foundation; live chart and bounded polling remain.
 - [x] 3. Rule-based warning diagnosis foundation; Windows Event Log analysis remains.
 - [x] 4. Hardware intelligence foundation via OS and processor snapshot.
-- [x] 5. System-volume storage metrics foundation; volume explorer and SMART remain.
+- [x] 5. Bounded mounted-volume storage inventory; volume explorer and SMART remain.
 - [x] 6. Read-only Windows driver inventory foundation; update comparison remains.
 - [x] 7. Read-only Windows Defender/firewall status audit foundation; privacy review remains.
 - [ ] 8. Optional AI explanation provider; local-first, explicit opt-in, no telemetry.
