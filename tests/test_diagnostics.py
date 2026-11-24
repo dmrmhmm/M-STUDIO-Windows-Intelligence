@@ -67,3 +67,20 @@ def test_windows_snapshot_includes_bounded_os_metadata(monkeypatch):
     assert snapshot.os_version == "10.0.26100"
     assert snapshot.os_build == "26100"
     assert snapshot.os_architecture == "64-bit"
+
+
+def test_windows_processor_fallback_when_platform_name_is_missing(monkeypatch):
+    import mstudio.core.diagnostics as diagnostics
+
+    monkeypatch.setattr(diagnostics.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(diagnostics.platform, "processor", lambda: "")
+    monkeypatch.setattr(diagnostics, "get_windows_os_details", lambda timeout_seconds: None)
+    monkeypatch.setattr(
+        diagnostics,
+        "get_windows_processor_name",
+        lambda timeout_seconds: "Intel(R) Core(TM) i3-1215U",
+    )
+
+    snapshot = diagnostics.collect_snapshot()
+
+    assert snapshot.processor == "Intel(R) Core(TM) i3-1215U"
