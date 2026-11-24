@@ -3,18 +3,17 @@
 from __future__ import annotations
 
 import sqlite3
-
 from collections.abc import Callable
 
 from PySide6.QtCore import QObject, QRunnable, Qt, QThreadPool, Signal, Slot
 from PySide6.QtWidgets import (
+    QFileDialog,
     QGridLayout,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QMainWindow,
-    QFileDialog,
     QMessageBox,
-    QInputDialog,
     QPushButton,
     QScrollArea,
     QVBoxLayout,
