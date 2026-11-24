@@ -22,6 +22,7 @@ A lightweight Windows 10/11 desktop companion for system visibility, diagnostics
 - Transparent health scoring and advisory-only recommendations.
 - On-demand performance snapshot, bounded live monitor, and local JSON report export.
 - Explicitly enabled local SQLite history with bounded retention (30 days / 1,000 records by default).
+- Optional AI explanations through a user-selected Ollama model on loopback only; disabled unless explicitly invoked.
 - Read-only driver and Defender/firewall inventory on Windows.
 - Bounded mounted-volume storage inventory; inaccessible volumes are skipped and no files are modified.
 - Small modular architecture suitable for low-resource Windows PCs.
@@ -60,7 +61,7 @@ python -m pytest
 - `docs`: architecture, roadmap, and security notes.
 
 ## Configuration
-No API key, cloud account, or administrator permission is required. No telemetry is sent. The initial version does not connect to a remote AI service.
+No API key, cloud account, or administrator permission is required. No telemetry is sent. The optional AI explanation action connects only to `127.0.0.1:11434` after the user selects a local model; it never sends diagnostics to a remote AI service.
 
 ## Status and limitations
 This is an early foundation, not a system optimizer or repair utility. Metrics depend on the host OS and available permissions. Disk usage is reported for the current system volume only. Windows-specific CIM details are optional and gracefully fall back when PowerShell is unavailable. Manual refresh, storage inventory, and Windows system audit run in background workers and do not block the dashboard. Storage inventory is limited to at most 32 mounted volumes per scan. Snapshot history is never written by default; the user must choose a local SQLite file, and retention is bounded. Driver and security data are informational snapshots, not update recommendations or a complete security assessment.
