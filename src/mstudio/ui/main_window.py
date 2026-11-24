@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 from mstudio.core.diagnostics import collect_snapshot
+from mstudio.core.explanations import explain_metric
 from mstudio.core.insights import assess_health, build_recommendations
 from mstudio.core.models import SystemSnapshot
 from mstudio.core.performance import collect_performance_sample
@@ -153,7 +154,15 @@ class MainWindow(QMainWindow):
             card_layout = QVBoxLayout(card)
             heading = QLabel(label)
             heading.setObjectName("metricLabel")
+            metric_explanations = {
+                "SYSTEM HEALTH": "health_score",
+                "MEMORY LOAD": "memory_percent",
+                "DISK USAGE": "disk_percent",
+            }
+            explanation = explain_metric(metric_explanations.get(label, label.lower().replace(" ", "_")))
+            heading.setToolTip(explanation)
             content = QLabel(value)
+            content.setToolTip(explanation)
             content.setObjectName("metricValue")
             content.setProperty("metricKey", label)
             content.setWordWrap(True)
