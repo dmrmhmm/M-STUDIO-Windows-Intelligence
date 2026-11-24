@@ -163,6 +163,11 @@ class MainWindow(QMainWindow):
             grid.addWidget(card, index // 2, index % 2)
         layout.addWidget(grid_host)
 
+        self._insight_label = QLabel()
+        self._insight_label.setObjectName("insights")
+        self._insight_label.setWordWrap(True)
+        layout.addWidget(self._insight_label)
+
         status = QLabel(
             "SAFE MODE ACTIVE  •  No settings, services, registry keys, or files were changed."
         )
@@ -192,7 +197,7 @@ class MainWindow(QMainWindow):
             QLabel#metricLabel { font-size: 10px; font-weight: 700; }
             QLabel#metricValue { font-size: 16px; font-weight: 600; padding-top: 5px; }
             QLabel#status { color: #8fd3b2; padding: 12px 4px; }
-            QLabel#warning { color: #f0c674; }
+            QLabel#warning { color: #f0c674; }\n            QLabel#insights { color: #b9d7ed; padding: 8px 4px; }
             QLabel#footer { font-size: 10px; padding-top: 10px; }
             QPushButton#refreshButton { background: #29465b; border: 1px solid #52738c;
                 border-radius: 6px; padding: 8px 16px; font-weight: 600; }
@@ -206,6 +211,13 @@ class MainWindow(QMainWindow):
         for label, value in _snapshot_values(snapshot).items():
             self._value_labels[label].setText(value)
         self._warning_label.setText("\\n".join(snapshot.warnings))
+        recommendations = build_recommendations(snapshot)
+        self._insight_label.setText(
+            "RECOMMENDATIONS\\n" + "\\n".join(
+                f"• [{item.priority}] {item.title}: {item.explanation}"
+                for item in recommendations
+            )
+        )
         self._footer.setText(
             f"Collected: {snapshot.collected_at}  |  M / STUDIO 0.1.0"
         )
