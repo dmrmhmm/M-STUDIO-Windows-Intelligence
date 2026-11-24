@@ -36,7 +36,7 @@
 - [x] 1. System health engine foundation.
 - [x] 2. One-shot and bounded live performance sampling; live chart remains.
 - [x] 3. Rule-based warning diagnosis foundation; Windows Event Log analysis remains.
-- [x] 4. Hardware intelligence foundation via OS and processor snapshot.
+- [x] 4. Hardware metadata includes OS, processor, BIOS, baseboard, and graphics inventory; serial identifiers are excluded.
 - [x] 5. Bounded mounted-volume storage inventory; volume explorer and SMART remain.
 - [x] 6. Read-only Windows driver inventory foundation; update comparison remains.
 - [x] 7. Read-only Windows Defender/firewall status audit foundation; privacy review remains.
