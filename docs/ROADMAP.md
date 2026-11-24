@@ -9,6 +9,8 @@
 
 ## Phase 0.2 - Reliability
 - [ ] Windows 10 and Windows 11 smoke tests.
+- [x] Add a manually triggered Windows x64 portable ZIP build workflow.
+- [ ] Add signed installer and real Windows launch smoke test.
 - [ ] Add structured logging with local opt-in.
 - [x] Add manual refresh action and update collection timestamp.
 - [x] Run startup and refresh collection on a bounded Qt worker thread.
