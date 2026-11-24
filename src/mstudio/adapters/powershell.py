@@ -32,6 +32,15 @@ _SECURITY_COMMAND = (
     "$firewall = @(Get-NetFirewallProfile | Select-Object Name, Enabled) }; "
     "[PSCustomObject]@{ Defender = $defender; Firewall = $firewall } | ConvertTo-Json -Depth 4 -Compress"
 )
+_HARDWARE_COMMAND = (
+    "$ErrorActionPreference = 'Stop'; "
+    "$bios = Get-CimInstance -ClassName Win32_BIOS | Select-Object -First 1 Manufacturer, SMBIOSBIOSVersion, ReleaseDate; "
+    "$board = Get-CimInstance -ClassName Win32_BaseBoard | Select-Object -First 1 Manufacturer, Product; "
+    "$graphics = @(Get-CimInstance -ClassName Win32_VideoController | "
+    "Select-Object -First 4 Name, DriverVersion, VideoProcessor); "
+    "[PSCustomObject]@{ BIOS = $bios; Baseboard = $board; Graphics = $graphics } | "
+    "ConvertTo-Json -Depth 4 -Compress"
+)
 _PROCESSOR_COMMAND = (
     "$ErrorActionPreference = 'Stop'; "
     "Get-CimInstance -ClassName Win32_Processor | "
@@ -88,4 +97,10 @@ def get_windows_driver_inventory(timeout_seconds: int = 10) -> list[dict[str, An
 def get_windows_security_status(timeout_seconds: int = 10) -> dict[str, Any] | None:
     """Return available Defender and firewall status fields; never changes configuration."""
     data = _run_fixed_query(_SECURITY_COMMAND, timeout_seconds)
+    return data if isinstance(data, dict) else None
+
+
+def get_windows_hardware_inventory(timeout_seconds: int = 10) -> dict[str, Any] | None:
+    """Return bounded BIOS, baseboard, and graphics metadata without serial numbers."""
+    data = _run_fixed_query(_HARDWARE_COMMAND, timeout_seconds)
     return data if isinstance(data, dict) else None
