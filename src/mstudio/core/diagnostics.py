@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import platform
 
+from mstudio.adapters.powershell import get_windows_os_details
 from mstudio.core.models import SystemSnapshot
 
 
@@ -14,6 +15,14 @@ def collect_snapshot() -> SystemSnapshot:
         hostname=platform.node() or "Unknown",
         processor=platform.processor() or "Unknown",
     )
+    if platform.system() == "Windows":
+        windows_details = get_windows_os_details(timeout_seconds=3)
+        if windows_details:
+            snapshot.os_caption = str(windows_details.get("Caption") or "")
+            snapshot.os_version = str(windows_details.get("Version") or "")
+            snapshot.os_build = str(windows_details.get("BuildNumber") or "")
+            snapshot.os_architecture = str(windows_details.get("OSArchitecture") or "")
+
     try:
         import psutil
     except ImportError:
