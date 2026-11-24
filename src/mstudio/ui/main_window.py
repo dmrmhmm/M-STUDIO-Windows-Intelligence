@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from mstudio.core.audits import audit_drivers, audit_security
 from mstudio.core.diagnostics import collect_snapshot
 from mstudio.core.explanations import explain_metric
 from mstudio.core.insights import assess_health, build_recommendations
@@ -99,6 +100,25 @@ class _RefreshWorker(QRunnable):
             self.signals.finished.emit(snapshot, None)
 
 
+class _AuditSignals(QObject):
+    finished = Signal(object, object)
+
+
+class _AuditWorker(QRunnable):
+    def __init__(self) -> None:
+        super().__init__()
+        self.signals = _AuditSignals()
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            result = {"drivers": audit_drivers(), "security": audit_security()}
+        except Exception as exc:  # Convert audit provider failures into UI-safe results.  # noqa: BLE001
+            self.signals.finished.emit(None, f"{type(exc).__name__}: {exc}")
+        else:
+            self.signals.finished.emit(result, None)
+
+
 class MainWindow(QMainWindow):
     refresh_finished = Signal(bool)
 
@@ -111,6 +131,7 @@ class MainWindow(QMainWindow):
         self._refresh_callback = refresh_callback
         self._current_snapshot = snapshot
         self._refresh_worker: _RefreshWorker | None = None
+        self._audit_worker: _AuditWorker | None = None
         self.setWindowTitle("M / STUDIO | Windows Intelligence")
         self.resize(900, 620)
         self.setMinimumSize(640, 460)
@@ -144,6 +165,11 @@ class MainWindow(QMainWindow):
         self.export_button.setToolTip("Save a local JSON diagnostics report")
         self.export_button.clicked.connect(self.choose_report_destination)
         header.addWidget(self.export_button)
+        self.audit_button = QPushButton("System audit")
+        self.audit_button.setObjectName("auditButton")
+        self.audit_button.setToolTip("Run bounded, read-only driver and security inventory")
+        self.audit_button.clicked.connect(self.run_system_audit)
+        header.addWidget(self.audit_button)
         layout.addLayout(header)
 
         grid_host = QWidget()
@@ -254,6 +280,49 @@ class MainWindow(QMainWindow):
         self.refresh_button.setText("Refresh")
         self.refresh_button.setEnabled(True)
         self.refresh_finished.emit(succeeded)
+
+    @Slot()
+    def run_system_audit(self) -> None:
+        """Run fixed, read-only Windows audits away from the UI thread."""
+        if self._audit_worker is not None:
+            return
+        self.audit_button.setEnabled(False)
+        self.audit_button.setText("Auditing…")
+        worker = _AuditWorker()
+        worker.signals.finished.connect(self._finish_system_audit)
+        self._audit_worker = worker
+        QThreadPool.globalInstance().start(worker)
+
+    @Slot(object, object)
+    def _finish_system_audit(self, result: object, error: object) -> None:
+        self._audit_worker = None
+        self.audit_button.setEnabled(True)
+        self.audit_button.setText("System audit")
+        if not isinstance(result, dict) or error is not None:
+            QMessageBox.warning(self, "System audit unavailable", str(error or "Unexpected audit result"))
+            return
+
+        drivers = result["drivers"]
+        security = result["security"]
+        driver_text = (
+            f"Driver inventory: {drivers['count']} entries"
+            if drivers.get("available")
+            else f"Driver inventory: unavailable ({drivers.get('reason', 'unknown reason')})"
+        )
+        if security.get("available"):
+            status = security["status"]
+            defender = status.get("Defender")
+            firewall = status.get("Firewall", [])
+            security_text = (
+                f"Defender data: {'available' if defender is not None else 'not available'}; "
+                f"firewall profiles reported: {len(firewall) if isinstance(firewall, list) else 'unknown'}"
+            )
+        else:
+            security_text = f"Security audit: unavailable ({security.get('reason', 'unknown reason')})"
+        QMessageBox.information(
+            self, "Read-only system audit",
+            "\n".join((driver_text, security_text, "No settings or drivers were changed.")),
+        )
 
     @Slot()
     def show_performance_sample(self) -> None:
