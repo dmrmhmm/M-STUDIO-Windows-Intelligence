@@ -36,8 +36,8 @@
 - [x] 3. Rule-based warning diagnosis foundation; Windows Event Log analysis remains.
 - [x] 4. Hardware intelligence foundation via OS and processor snapshot.
 - [x] 5. System-volume storage metrics foundation; volume explorer and SMART remain.
-- [ ] 6. Read-only driver and update audit.
-- [ ] 7. Read-only security and privacy audit.
+- [x] 6. Read-only Windows driver inventory foundation; update comparison remains.
+- [x] 7. Read-only Windows Defender/firewall status audit foundation; privacy review remains.
 - [ ] 8. Optional AI explanation provider; local-first, explicit opt-in, no telemetry.
 - [x] 9. Local JSON report generation foundation.
 - [x] 10. Maintenance preview contract; no action execution.
