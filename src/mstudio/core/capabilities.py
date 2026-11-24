@@ -3,7 +3,7 @@ FEATURES = (
     ("system_health", "System health engine", "active"),
     ("performance", "Performance monitoring", "one-shot and bounded live sampling"),
     ("error_diagnostics", "Error diagnosis", "rule-based warning classification"),
-    ("hardware", "Hardware intelligence", "snapshot foundation"),
+    ("hardware", "Hardware intelligence", "OS, processor, BIOS, baseboard, and graphics metadata"),
     ("storage", "Disk and storage analysis", "system-volume metrics"),
     ("drivers", "Driver and update audit", "read-only inventory foundation"),
     ("security", "Security and privacy center", "read-only Defender/firewall audit foundation"),
