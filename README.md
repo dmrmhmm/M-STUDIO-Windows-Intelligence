@@ -15,6 +15,8 @@ A lightweight Windows 10/11 desktop companion for system visibility, diagnostics
 
 ## Features
 - Desktop dashboard for OS, CPU, memory, disk, and runtime information.
+- Background refresh that keeps the interface responsive and preserves the last valid snapshot on errors.
+- Optional Windows edition, version, build, architecture, and processor identification through fixed, read-only CIM queries.
 - Cross-platform fallback for development and automated tests.
 - Structured diagnostics model with collection timestamps and warnings.
 - Small modular architecture suitable for low-resource Windows PCs.
@@ -56,7 +58,7 @@ python -m pytest
 No API key, cloud account, or administrator permission is required. No telemetry is sent. The initial version does not connect to a remote AI service.
 
 ## Status and limitations
-This is an early foundation, not a system optimizer or repair utility. Metrics depend on the host OS and available permissions. Disk usage is reported for the current system volume only. Windows-specific CIM details are optional and gracefully fall back when PowerShell is unavailable.
+This is an early foundation, not a system optimizer or repair utility. Metrics depend on the host OS and available permissions. Disk usage is reported for the current system volume only. Windows-specific CIM details are optional and gracefully fall back when PowerShell is unavailable. Manual refresh runs in a background worker and does not block the dashboard.
 
 ## License
 MIT. See [LICENSE](LICENSE). Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
