@@ -57,7 +57,7 @@ def _snapshot_values(snapshot: SystemSnapshot) -> dict[str, str]:
         )
         if value
     )
-    operating_system = f"{os_name}\\n{os_details}" if os_details else os_name
+    operating_system = f"{os_name}\n{os_details}" if os_details else os_name
     return {
         "SYSTEM HEALTH": f"{health.score}/100 · {health.status}",
         "OPERATING SYSTEM": operating_system,
@@ -309,10 +309,10 @@ class MainWindow(QMainWindow):
         self._current_snapshot = snapshot
         for label, value in _snapshot_values(snapshot).items():
             self._value_labels[label].setText(value)
-        self._warning_label.setText("\\n".join(snapshot.warnings))
+        self._warning_label.setText("\n".join(snapshot.warnings))
         recommendations = build_recommendations(snapshot)
         self._insight_label.setText(
-            "RECOMMENDATIONS\\n" + "\\n".join(
+            "RECOMMENDATIONS\n" + "\n".join(
                 f"• [{item.priority}] {item.title}: {item.explanation}"
                 for item in recommendations
             )
@@ -413,13 +413,13 @@ class MainWindow(QMainWindow):
         if not volumes:
             message = "No accessible mounted volumes were found."
         else:
-            message = "\\n".join(
+            message = "\n".join(
                 f"{item.mountpoint} ({item.filesystem}): {item.percent_used:.1f}% used, "
                 f"{_format_bytes(item.free_bytes)} free of {_format_bytes(item.total_bytes)}"
                 for item in volumes
             )
         QMessageBox.information(
-            self, "Storage inventory", message + "\\n\\nRead-only inspection; no files were changed."
+            self, "Storage inventory", message + "\n\nRead-only inspection; no files were changed."
         )
         self.storage_finished.emit(True)
 
@@ -440,7 +440,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(
             self,
             "Performance snapshot",
-            "\\n".join((*values, f"Collected: {sample.collected_at}")),
+            "\n".join((*values, f"Collected: {sample.collected_at}")),
         )
 
     @Slot()
@@ -454,7 +454,7 @@ class MainWindow(QMainWindow):
         if not accepted or not model.strip():
             return
         snapshot = self._current_snapshot
-        prompt = "\\n".join((
+        prompt = "\n".join((
             f"System health: {assess_health(snapshot).score}/100 ({assess_health(snapshot).status})",
             f"Memory usage: {snapshot.memory_percent if snapshot.memory_percent is not None else 'unavailable'}%",
             f"System disk usage: {snapshot.disk_percent if snapshot.disk_percent is not None else 'unavailable'}%",
@@ -516,4 +516,4 @@ class MainWindow(QMainWindow):
         except OSError as exc:
             QMessageBox.warning(self, "Report export failed", f"Could not save report: {exc}")
         else:
-            QMessageBox.information(self, "Report exported", f"Saved local report to:\\n{destination}")
+            QMessageBox.information(self, "Report exported", f"Saved local report to:\n{destination}")
