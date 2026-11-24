@@ -180,3 +180,36 @@ def test_history_button_saves_only_to_user_selected_local_path(qapp, tmp_path, m
         payload = connection.execute("SELECT payload FROM snapshots").fetchone()[0]
     assert "history-host" in payload
     assert "30 days / 1,000 records" in messages[0][2]
+
+
+def test_local_ai_requires_explicit_model_choice_and_runs_in_worker(qapp, monkeypatch):
+    from mstudio.ui import main_window
+
+    requested = []
+    shown = []
+    monkeypatch.setattr(main_window.QInputDialog, "getText",
+                        lambda *args: ("local-test-model", True))
+    monkeypatch.setattr(main_window, "explain_with_local_model",
+                        lambda prompt, model, enabled: requested.append((prompt, model, enabled)) or "Local explanation")
+    monkeypatch.setattr(main_window.QMessageBox, "information", lambda *args: shown.append(args))
+    window = MainWindow(SystemSnapshot(memory_percent=88, warnings=["Memory elevated"]))
+    outcomes = []
+    window.local_ai_finished.connect(outcomes.append)
+    window.request_local_ai_explanation()
+    assert not window.local_ai_button.isEnabled()
+    assert QThreadPool.globalInstance().waitForDone(5000)
+    qapp.processEvents()
+    assert outcomes == [True]
+    assert requested and requested[0][1:] == ("local-test-model", True)
+    assert "Memory elevated" in requested[0][0]
+    assert shown[0][2] == "Local explanation"
+
+
+def test_local_ai_cancel_does_not_start_worker(qapp, monkeypatch):
+    from mstudio.ui import main_window
+
+    monkeypatch.setattr(main_window.QInputDialog, "getText", lambda *args: ("", False))
+    window = MainWindow(SystemSnapshot())
+    window.request_local_ai_explanation()
+    assert window._local_ai_worker is None
+    assert window.local_ai_button.isEnabled()
