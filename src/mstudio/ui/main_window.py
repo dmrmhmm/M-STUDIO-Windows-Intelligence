@@ -409,6 +409,7 @@ class MainWindow(QMainWindow):
             self, "Read-only system audit",
             "\n".join((driver_text, security_text, hardware_text, "No settings or drivers were changed.")),
         )
+        self.audit_finished.emit(True)
 
     @Slot()
     def inspect_storage(self) -> None:
