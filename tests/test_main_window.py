@@ -1,7 +1,12 @@
+import json
+import sqlite3
+
 from PySide6.QtCore import QEventLoop, QThreadPool, QTimer
 from PySide6.QtWidgets import QLabel
 
 from mstudio.core.models import SystemSnapshot
+from mstudio.core.performance import PerformanceSample
+from mstudio.ui import main_window
 from mstudio.ui.main_window import MainWindow
 
 
@@ -63,9 +68,6 @@ def test_refresh_rejects_non_snapshot_result(qapp):
 
 
 def test_export_report_uses_latest_snapshot(qapp, tmp_path, monkeypatch):
-    import json
-    from mstudio.ui import main_window
-
     window = MainWindow(SystemSnapshot(hostname="report-host"))
     messages = []
     monkeypatch.setattr(main_window.QMessageBox, "information",
@@ -79,9 +81,6 @@ def test_export_report_uses_latest_snapshot(qapp, tmp_path, monkeypatch):
 
 
 def test_performance_button_uses_single_local_sample(qapp, monkeypatch):
-    from mstudio.core.performance import PerformanceSample
-    from mstudio.ui import main_window
-
     window = MainWindow(SystemSnapshot())
     shown = []
     monkeypatch.setattr(
@@ -105,8 +104,6 @@ def test_dashboard_displays_explainable_recommendations(qapp):
 
 
 def test_system_audit_runs_off_ui_thread_and_reports_read_only_result(qapp, monkeypatch):
-    from mstudio.ui import main_window
-
     monkeypatch.setattr(
         main_window, "audit_drivers",
         lambda: {"available": True, "count": 12, "drivers": []},
@@ -143,7 +140,6 @@ def test_system_audit_runs_off_ui_thread_and_reports_read_only_result(qapp, monk
 
 def test_storage_button_reports_read_only_volume_inventory(qapp, monkeypatch):
     from types import SimpleNamespace
-    from mstudio.ui import main_window
 
     monkeypatch.setattr(
         main_window, "collect_storage_volumes",
@@ -166,9 +162,6 @@ def test_storage_button_reports_read_only_volume_inventory(qapp, monkeypatch):
 
 
 def test_history_button_saves_only_to_user_selected_local_path(qapp, tmp_path, monkeypatch):
-    import sqlite3
-    from mstudio.ui import main_window
-
     destination = tmp_path / "chosen-history.sqlite3"
     messages = []
     monkeypatch.setattr(main_window.QMessageBox, "information", lambda *args: messages.append(args))
@@ -182,8 +175,6 @@ def test_history_button_saves_only_to_user_selected_local_path(qapp, tmp_path, m
 
 
 def test_local_ai_requires_explicit_model_choice_and_runs_in_worker(qapp, monkeypatch):
-    from mstudio.ui import main_window
-
     requested = []
     shown = []
     monkeypatch.setattr(main_window.QInputDialog, "getText",
