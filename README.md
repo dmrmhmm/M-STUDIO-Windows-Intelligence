@@ -2,11 +2,12 @@
 
 A lightweight Windows 10/11 desktop companion for system visibility, diagnostics, and carefully controlled maintenance.
 
-## Current release line
-**Phase 0.1 · Foundation**. This repository currently provides a read-only diagnostics desktop application. It does not modify Windows settings, registry keys, services, startup entries, packages, or files.
+## Current development status
+**Phase 0.4 · Intelligence foundations**. The repository includes a command dashboard and read-only foundations for system health, performance, warning diagnosis, hardware and storage inventory, driver/security audits, local AI explanations, reports, and maintenance previews. This remains a development build, not a signed installer or a verified Windows release.
 
 ## Safety model
-- Read-only collection is the default and only implemented operating mode.
+- System inspection and recommendations are read-only; Windows settings, services, registry keys, startup entries, and installed packages are not modified.
+- Local JSON reports and SQLite history are written only after the user explicitly chooses a destination.
 - No arbitrary shell command input or execution.
 - PowerShell calls are fixed, bounded, non-interactive inventory queries.
 - Missing permissions or unavailable platform data are reported, not bypassed.
@@ -24,7 +25,7 @@ A lightweight Windows 10/11 desktop companion for system visibility, diagnostics
 - Explicitly enabled local SQLite history with bounded retention (30 days / 1,000 records by default).
 - Optional AI explanations through a user-selected Ollama model on loopback only; disabled unless explicitly invoked.
 - Read-only driver, Defender/firewall, BIOS, baseboard, and graphics inventory on Windows; serial identifiers are excluded.
-- Bounded mounted-volume storage inventory; inaccessible volumes are skipped and no files are modified.
+- Bounded on-demand inventory of up to 32 accessible mounted volumes; the overview disk metric remains focused on the system volume.
 - Small modular architecture suitable for low-resource Windows PCs.
 
 ## Requirements
@@ -49,7 +50,7 @@ If script activation is restricted, run the venv interpreter directly:
 ```
 
 ## Build a Windows portable package
-The `Windows portable package` workflow can be started manually from GitHub Actions or by pushing a `v*` tag. It builds a Windows x64 onedir application and publishes a ZIP artifact. This is a portable build, not yet a signed installer; a real Windows launch smoke test is still required.
+The `Windows portable package` workflow runs manually, on `v*` tags, and when application or packaging sources change on `main`. It builds a Windows x64 onedir application and publishes a ZIP artifact. This is a portable build, not a signed installer; a real Windows launch smoke test is still required.
 
 ## Run tests
 ```powershell
@@ -67,7 +68,7 @@ python -m pytest
 No API key, cloud account, or administrator permission is required. No telemetry is sent. The optional AI explanation action connects only to `127.0.0.1:11434` after the user selects a local model; it never sends diagnostics to a remote AI service.
 
 ## Status and limitations
-This is an early foundation, not a system optimizer or repair utility. Metrics depend on the host OS and available permissions. Disk usage is reported for the current system volume only. Windows-specific CIM details are optional and gracefully fall back when PowerShell is unavailable. Manual refresh, storage inventory, and Windows system audit run in background workers and do not block the dashboard. Storage inventory is limited to at most 32 mounted volumes per scan. Snapshot history is never written by default; the user must choose a local SQLite file, and retention is bounded. Driver and security data are informational snapshots, not update recommendations or a complete security assessment.
+This is an early foundation, not a system optimizer or repair utility. Metrics depend on the host OS and available permissions. The overview disk metric describes the system volume; a separate on-demand scan lists at most 32 accessible mounted volumes. Windows-specific inventory is optional and reports unavailable when PowerShell or a provider is missing; it does not request elevated permissions. Manual refresh, storage inventory, and Windows system audit run in background workers. Snapshot history is never written by default; the user must choose a local SQLite file, and retention is bounded. Driver and security data are informational snapshots, not update recommendations or a complete security assessment. The optional local AI provider contacts only 127.0.0.1 after explicit user invocation; no remote AI service or telemetry is used.
 
 ## License
 MIT. See [LICENSE](LICENSE). Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
