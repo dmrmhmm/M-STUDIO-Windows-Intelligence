@@ -3,7 +3,12 @@ name: Windows portable package
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     tags: ["v*"]
+    paths:
+      - "src/**"
+      - "pyproject.toml"
+      - ".github/workflows/package-windows.yml"
 
 permissions:
   contents: read
