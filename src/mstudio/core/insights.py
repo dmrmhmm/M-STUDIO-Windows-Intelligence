@@ -8,7 +8,7 @@ from mstudio.core.models import SystemSnapshot
 
 @dataclass(frozen=True, slots=True)
 class HealthAssessment:
-    score: int
+    score: int | None
     status: str
     findings: tuple[str, ...]
 
@@ -22,7 +22,13 @@ class Recommendation:
 
 
 def assess_health(snapshot: SystemSnapshot) -> HealthAssessment:
-    """Calculate a transparent score from available measurements only."""
+    """Calculate a transparent score, or report insufficient data when unmeasured."""
+    if snapshot.memory_percent is None and snapshot.disk_percent is None:
+        findings = ["Memory and system disk usage are unavailable; health cannot be assessed."]
+        if snapshot.warnings:
+            findings.append(f"{len(snapshot.warnings)} diagnostic warning(s) need review.")
+        return HealthAssessment(score=None, status="Insufficient data", findings=tuple(findings))
+
     score = 100
     findings: list[str] = []
     if snapshot.memory_percent is not None and snapshot.memory_percent >= 90:
@@ -48,6 +54,12 @@ def assess_health(snapshot: SystemSnapshot) -> HealthAssessment:
 def build_recommendations(snapshot: SystemSnapshot) -> list[Recommendation]:
     """Return conservative recommendations; never execute remediation."""
     items: list[Recommendation] = []
+    if snapshot.memory_percent is None and snapshot.disk_percent is None:
+        items.append(Recommendation(
+            "Health assessment unavailable",
+            "No usable memory or system disk measurements are available. Refresh diagnostics before assessing health.",
+            "Info",
+        ))
     if snapshot.memory_percent is not None and snapshot.memory_percent >= 80:
         items.append(Recommendation(
             "Review memory usage",
