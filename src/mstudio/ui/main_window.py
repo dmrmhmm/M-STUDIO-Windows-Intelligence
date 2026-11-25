@@ -58,7 +58,9 @@ def _snapshot_values(snapshot: SystemSnapshot) -> dict[str, str]:
     )
     operating_system = f"{os_name}\n{os_details}" if os_details else os_name
     return {
-        "SYSTEM HEALTH": f"{health.score}/100 · {health.status}",
+        "SYSTEM HEALTH": (
+            f"{health.score}/100 · {health.status}" if health.score is not None else health.status
+        ),
         "OPERATING SYSTEM": operating_system,
         "DEVICE": snapshot.hostname,
         "PROCESSOR": snapshot.processor or "Unavailable",
@@ -619,8 +621,14 @@ class MainWindow(QMainWindow):
         if not accepted or not model.strip():
             return
         snapshot = self._current_snapshot
+        health = assess_health(snapshot)
+        health_summary = (
+            f"{health.score}/100 ({health.status})"
+            if health.score is not None
+            else health.status
+        )
         prompt = "\n".join((
-            f"System health: {assess_health(snapshot).score}/100 ({assess_health(snapshot).status})",
+            f"System health: {health_summary}",
             f"Memory usage: {snapshot.memory_percent if snapshot.memory_percent is not None else 'unavailable'}%",
             f"System disk usage: {snapshot.disk_percent if snapshot.disk_percent is not None else 'unavailable'}%",
             *snapshot.warnings,
