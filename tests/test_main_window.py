@@ -211,6 +211,9 @@ def test_jarvis_command_dashboard_exposes_core_and_read_only_controls(qapp):
     assert window.findChild(QLabel, "coreOrb").text() == "M"
     assert window.findChild(QLabel, "heroKicker").text() == "INTELLIGENCE CORE  /  ONLINE"
     assert window.findChild(QLabel, "safeIndicator") is not None
+    status = window.findChild(QLabel, "status")
+    assert status is not None
+    assert "written only when explicitly requested" in status.text()
     assert window.findChild(QLabel, "sectionTitle") is not None
     assert window.findChild(QLabel, "metricValue") is not None
     assert window.refresh_button.text() == "↻  Refresh scan"
