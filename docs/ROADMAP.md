@@ -21,7 +21,7 @@
 - [x] Add bounded read-only inventory for up to 32 mounted disk volumes.
 - [ ] Add user-selectable volume focus and SMART health where safely available.
 - [ ] Add accessibility and high-DPI review.
-- [ ] Verify all refresh and metadata behavior in Windows and Ubuntu CI.
+- [x] Verify all refresh and metadata behavior in Windows and Ubuntu CI (45 tests passed on Windows and Ubuntu, Python 3.11 and 3.12).
 
 ## Phase 0.3 - Intelligence foundations
 - [x] Add transparent system health scoring from available snapshot metrics.
