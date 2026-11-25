@@ -45,3 +45,13 @@ def test_maintenance_preview_never_executes():
 def test_ten_capabilities_are_registered():
     assert len(FEATURES) == 10
     assert len({item[0] for item in FEATURES}) == 10
+def test_health_assessment_is_unknown_without_usable_measurements():
+    snapshot = SystemSnapshot()
+    health = assess_health(snapshot)
+
+    assert health.score is None
+    assert health.status == "Insufficient data"
+    assert "cannot be assessed" in health.findings[0]
+
+    recommendations = build_recommendations(snapshot)
+    assert recommendations[0].title == "Health assessment unavailable"
