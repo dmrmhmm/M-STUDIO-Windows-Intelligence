@@ -376,7 +376,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(self._insight_label)
 
         status = QLabel(
-            "SAFE MODE ACTIVE  •  No settings, services, registry keys, or files were changed."
+            "SAFE MODE ACTIVE  •  System settings remain read-only. "
+            "Reports and history are written only when explicitly requested."
         )
         status.setObjectName("status")
         status.setWordWrap(True)
