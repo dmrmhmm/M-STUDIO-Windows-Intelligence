@@ -30,6 +30,14 @@ jobs:
       - name: Create portable ZIP
         shell: pwsh
         run: Compress-Archive -Path dist/MStudio-Windows/* -DestinationPath dist/MStudio-Windows-x64.zip
+      - name: Verify portable package
+        shell: pwsh
+        run: |
+          $executable = "dist/MStudio-Windows/MStudio-Windows.exe"
+          if (-not (Test-Path -LiteralPath $executable -PathType Leaf)) {
+            throw "Expected portable executable was not produced."
+          }
+          python -c "import zipfile; archive = zipfile.ZipFile('dist/MStudio-Windows-x64.zip'); assert archive.testzip() is None; assert any(name.lower().endswith('mstudio-windows.exe') for name in archive.namelist()); print('Portable ZIP integrity and executable entry verified.')"
       - uses: actions/upload-artifact@v4
         with:
           name: MStudio-Windows-x64
