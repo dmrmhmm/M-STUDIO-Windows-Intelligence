@@ -10,7 +10,10 @@
 ## Phase 0.2 - Reliability
 - [ ] Windows 10 and Windows 11 smoke tests.
 - [x] Add a manually triggered Windows x64 portable ZIP build workflow.
+- [x] Verify portable ZIP integrity and the expected executable entry during packaging CI.
 - [ ] Add signed installer and real Windows launch smoke test.
+- [ ] Migrate GitHub Actions to Node 24-native major versions to remove runner deprecation warnings.
+- [ ] Update license metadata to the PEP 639/SPDX form before 2027-02-18.
 - [ ] Add structured logging with local opt-in.
 - [x] Add manual refresh action and update collection timestamp.
 - [x] Run startup and refresh collection on a bounded Qt worker thread.
